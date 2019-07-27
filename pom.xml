@@ -34,6 +34,13 @@
         <dubbo.starter>2.0.0</dubbo.starter>
         <dubbo>2.5.5</dubbo>
         <zkclient>0.11</zkclient>
+        <fastjson>1.2.58</fastjson>
+        <mybatis-springboot>2.0.1</mybatis-springboot>
+        <mysql>8.0.13</mysql>
+        <pagehelper-springboot>1.2.10</pagehelper-springboot>
+        <druid-springboot>1.1.16</druid-springboot>
+        <kafka-version>2.2.7.RELEASE</kafka-version>
+        <redis>2.1.6.RELEASE</redis>
     </properties>
 
     <dependencyManagement>
@@ -49,23 +56,66 @@
                 <artifactId>dubbo-spring-boot-starter</artifactId>
                 <version>${dubbo.starter}</version>
             </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.alibaba</groupId>-->
+<!--                <artifactId>dubbo</artifactId>-->
+<!--                <version>${dubbo}</version>-->
+<!--                <scope>compile</scope>-->
+<!--                <exclusions>-->
+<!--                    <exclusion>-->
+<!--                        <artifactId>spring</artifactId>-->
+<!--                        <groupId>org.springframework</groupId>-->
+<!--                    </exclusion>-->
+<!--                </exclusions>-->
+<!--            </dependency>-->
             <dependency>
                 <groupId>com.alibaba</groupId>
-                <artifactId>dubbo</artifactId>
-                <version>${dubbo}</version>
-                <scope>compile</scope>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>spring</artifactId>
-                        <groupId>org.springframework</groupId>
-                    </exclusion>
-                </exclusions>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson}</version>
             </dependency>
             <dependency>
                 <groupId>com.101tec</groupId>
                 <artifactId>zkclient</artifactId>
                 <version>${zkclient}</version>
             </dependency>
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-springboot}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql}</version>
+                <scope>runtime</scope>
+            </dependency>
+
+            <!-- 分页插件 -->
+            <dependency>
+                <groupId>com.github.pagehelper</groupId>
+                <artifactId>pagehelper-spring-boot-starter</artifactId>
+                <version>${pagehelper-springboot}</version>
+            </dependency>
+            <!-- alibaba的druid数据库连接池 -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid-springboot}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.kafka</groupId>
+                <artifactId>spring-kafka</artifactId>
+                <version>${kafka-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-redis</artifactId>
+                <version>${redis}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

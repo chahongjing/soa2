@@ -16,14 +16,18 @@ import java.util.Map;
 @RestController
 @RequestMapping("/")
 public class IndexController {
-//    @Reference
-    @Autowired
+    @Reference
+//    @Autowired
     private TestApi testApi;
+
+    @Autowired
+    private KafkaProducer kafkaProducer;
 
     @GetMapping("index")
     public Map test() {
         Map<String, String> map = new HashMap<>();
         String test = testApi.test();
+        kafkaProducer.send("测试消息！");
         map.put("name", test);
         return map;
     }

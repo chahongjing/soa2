@@ -26,21 +26,22 @@
         </dependency>
 
         <!-- starter模式 -->
-<!--        <dependency>-->
-<!--            <groupId>com.alibaba.spring.boot</groupId>-->
-<!--            <artifactId>dubbo-spring-boot-starter</artifactId>-->
-<!--        </dependency>-->
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>dubbo</artifactId>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>spring</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>com.alibaba.spring.boot</groupId>
+            <artifactId>dubbo-spring-boot-starter</artifactId>
         </dependency>
+        <!-- xml模式 -->
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba</groupId>-->
+<!--            <artifactId>dubbo</artifactId>-->
+<!--            <scope>compile</scope>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <artifactId>spring</artifactId>-->
+<!--                    <groupId>org.springframework</groupId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
@@ -50,6 +51,10 @@
             <artifactId>api</artifactId>
             <version>1.0</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
         </dependency>
     </dependencies>
 
