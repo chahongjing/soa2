@@ -16,9 +16,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/")
 public class IndexController {
+    // 通过dubbo注入
     @Reference
 //    @Autowired
     private TestApi testApi;
+
+    // 通过starter方式注入
+    @Autowired
+    private TestApi testApiStarter;
 
     @Autowired
     private KafkaProducer kafkaProducer;
@@ -29,6 +34,8 @@ public class IndexController {
         String test = testApi.test();
         kafkaProducer.send("测试消息！");
         map.put("name", test);
+        String name = testApiStarter.getName();
+        System.out.println(name);
         return map;
     }
 }

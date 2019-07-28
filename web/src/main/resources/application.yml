@@ -27,3 +27,6 @@ spring:
       auto-commit-interval: 1000
 kafka:
   topic: test20180430
+my:
+  name: abc
+  enabletwo: true

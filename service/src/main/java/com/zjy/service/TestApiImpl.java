@@ -26,4 +26,14 @@ public class TestApiImpl implements TestApi {
         User user = userDao.get(1L);
         return "zjy11";
     }
+
+    @Override
+    public void setName(String name) {
+
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
 }
