@@ -33,9 +33,10 @@ public class IndexController {
         Map<String, String> map = new HashMap<>();
         String test = testApi.test();
         kafkaProducer.send("测试消息！");
-        map.put("name", test);
+        map.put("test", test);
         String name = testApiStarter.getName();
         System.out.println(name);
+        map.put("name", name);
         return map;
     }
 }

@@ -1,4 +1,4 @@
-package com.zjy.service;
+package com.zjy;
 
 import com.alibaba.dubbo.spring.boot.annotation.EnableDubboConfiguration;
 import org.mybatis.spring.annotation.MapperScan;

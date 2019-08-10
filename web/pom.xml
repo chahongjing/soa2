@@ -31,17 +31,17 @@
             <artifactId>dubbo-spring-boot-starter</artifactId>
         </dependency>
         <!-- xml模式 -->
-<!--        <dependency>-->
-<!--            <groupId>com.alibaba</groupId>-->
-<!--            <artifactId>dubbo</artifactId>-->
-<!--            <scope>compile</scope>-->
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>spring</artifactId>-->
-<!--                    <groupId>org.springframework</groupId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.alibaba</groupId>-->
+        <!--            <artifactId>dubbo</artifactId>-->
+        <!--            <scope>compile</scope>-->
+        <!--            <exclusions>-->
+        <!--                <exclusion>-->
+        <!--                    <artifactId>spring</artifactId>-->
+        <!--                    <groupId>org.springframework</groupId>-->
+        <!--                </exclusion>-->
+        <!--            </exclusions>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
@@ -62,6 +62,33 @@
             <version>1.0</version>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <!-- 本地开发环境 -->
+            <id>dev</id>
+            <properties>
+                <profiles.active>dev</profiles.active>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <!-- 测试环境 -->
+            <id>test</id>
+            <properties>
+                <profiles.active>test</profiles.active>
+            </properties>
+        </profile>
+        <profile>
+            <!-- 生产环境 -->
+            <id>online</id>
+            <properties>
+                <profiles.active>online</profiles.active>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
