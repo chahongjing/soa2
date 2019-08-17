@@ -1,40 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
-    <property resource="logback.properties"/>
+    <property name="logging.path" value="d:/abc"/>
+    <!-- black, highlight, gray, white, boldWhite, red, boldRed, green, boldGreen, yellow, boldYellow, blue, boldBlue,
+    magenta(洋红), boldMagenta, cyan(青色), boldCyan, %()使用 -->
 
+    <!-- DENY，日志将立即被抛弃不再经过其他过滤器；返回NEUTRAL，有序列表里的下个过滤器过接着处理日志；返回ACCEPT，日志会被立即处理，不再经过剩余过滤器。 -->
     <appender name="CONSOLE-LOG" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>[%d{yyyy-MM-dd' 'HH:mm:ss.sss}] [%C] [%t] [%L] [%-5p] %m%n</pattern>
+            <pattern>[%red(%d{yyyy-MM-dd' 'HH:mm:ss.sss})] [%highlight(%-5p)] [%t] [%C] [%L] %m%n</pattern>
         </layout>
     </appender>
     <!--获取比info级别高(包括info级别)但除error级别的日志-->
     <appender name="INFO-LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 级别过滤器，根据日志级别进行过滤。如果日志级别等于配置级别，过滤器会根据onMath 和 onMismatch接收或拒绝日志 -->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>ERROR</level>
             <onMatch>DENY</onMatch>
             <onMismatch>ACCEPT</onMismatch>
         </filter>
         <encoder>
-            <pattern>[%d{yyyy-MM-dd' 'HH:mm:ss.sss}] [%C] [%t] [%L] [%-5p] %m%n</pattern>
+            <pattern>[%d{yyyy-MM-dd' 'HH:mm:ss.sss}] [%-5p] [%t] [%C] [%L] %m%n</pattern>
         </encoder>
         <!--滚动策略-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--路径-->
-            <fileNamePattern>${LOG_INFO_HOME}//%d.log</fileNamePattern>
+            <fileNamePattern>${logging.path}//info_%d.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
     </appender>
     <appender name="ERROR-LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 临界值过滤器，过滤掉低于指定临界值的日志。当日志级别等于或高于临界值时，过滤器返回NEUTRAL；当日志级别低于临界值时，日志会被拒绝。 -->
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>ERROR</level>
         </filter>
         <encoder>
-            <pattern>[%d{yyyy-MM-dd' 'HH:mm:ss.sss}] [%C] [%t] [%L] [%-5p] %m%n</pattern>
+            <pattern>[%d{yyyy-MM-dd' 'HH:mm:ss.sss}] [%-5p] [%t] [%C] [%L] %m%n</pattern>
         </encoder>
         <!--滚动策略-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--路径-->
-            <fileNamePattern>${LOG_ERROR_HOME}//%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${logging.path}//error_%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
     </appender>
@@ -58,8 +63,8 @@
     </appender>
 
     <root level="info">
-        <appender-ref ref="CONSOLE-LOG"/>
+        <appender-ref ref="CONSOLE-LOG" />
         <appender-ref ref="ASYNC-INFO"/>
-        <appender-ref ref="ERROR-LOG"/>
+        <appender-ref ref="ASYNC-ERROR"/>
     </root>
 </configuration>
