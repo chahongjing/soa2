@@ -24,6 +24,7 @@
         <module>api</module>
         <module>mystarter</module>
         <module>service</module>
+        <module>service-remote</module>
         <module>web</module>
     </modules>
 

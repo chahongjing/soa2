@@ -1,0 +1,49 @@
+server:
+  port: 8080
+
+spring:
+  dubbo:
+    application:
+      name: provider
+    server: true
+    registry:
+      address: zookeeper://127.0.0.1:2181
+    protocol:
+      name: dubbo
+      port: 20880
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    password: root
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/toolsitemvc4j?useUnicode=true&characterEncoding=utf-8&noDatetimeStringSync=true&serverTimezone=Hongkong
+    username: root
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-serializer: org.apache.kafka.common.serialization.StringDeserializer
+    consumer:
+      group-id: test-consumer-group
+      enable-auto-commit: true
+      auto-commit-interval: 1000
+  redis:
+    database: 0
+    host: 127.0.0.1
+    password:
+    port: 6379
+    timeout: 1000
+    jedis:
+      pool:
+        max-active: 200
+mybatis:
+  mapper-locations: classpath:mybatis/*.xml
+  type-aliases-package: com.zjy.po
+
+logging:
+  level:
+    com:
+      zjy:
+        dao: DEBUG
+
+kafka:
+  topic: test20180430

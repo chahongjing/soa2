@@ -19,11 +19,11 @@ public class IndexController {
     // 通过dubbo注入
     @Reference
 //    @Autowired
-    private TestApi testApi;
+    private TestApi dubboTestApi;
 
     // 通过starter方式注入
     @Autowired
-    private TestApi testApiStarter;
+    private TestApi starterTestApi;
 
     @Autowired
     private KafkaProducer kafkaProducer;
@@ -31,10 +31,10 @@ public class IndexController {
     @GetMapping("index")
     public Map test() {
         Map<String, String> map = new HashMap<>();
-        String test = testApi.test();
+        String test = dubboTestApi.test();
         kafkaProducer.send("测试消息！");
         map.put("test", test);
-        String name = testApiStarter.getName();
+        String name = starterTestApi.getName();
         System.out.println(name);
         map.put("name", name);
         return map;

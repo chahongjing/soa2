@@ -8,11 +8,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 //@ImportResource("classpath:*.xml")
 @EnableDubboConfiguration
-@MapperScan("com.zjy")
-public class ServiceApplication {
+@MapperScan("com.zjy.dao")
+public class ServiceRemoteApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ServiceApplication.class, args);
+        SpringApplication.run(ServiceRemoteApplication.class, args);
     }
 
 }

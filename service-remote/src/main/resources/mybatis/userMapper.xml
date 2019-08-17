@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjy.dao.UserDao">
+    <!-- 基本操作区 -->
+    <!-- 添加 -->
+    <select id="get" resultType="com.zjy.po.User">
+        SELECT
+        <include refid="field"></include>
+        FROM myUser
+        where userid = #{id, jdbcType=BIGINT}
+    </select>
+
+    <update id="update">
+        update myUser
+        <set>
+            <if test='name != null and name != ""'>
+                name = #{name, jdbcType=VARCHAR}
+            </if>
+        </set>
+        where userid = #{userid, jdbcType=BIGINT}
+    </update>
+
+    <!-- 公共信息 -->
+    <!-- 字段 -->
+    <sql id="field">
+        userid, name
+    </sql>
+    <!-- 带前缀的字段 -->
+    <sql id="fieldWithPrefix">
+        ${tableName}.userId, ${tableName}.name
+    </sql>
+</mapper>
