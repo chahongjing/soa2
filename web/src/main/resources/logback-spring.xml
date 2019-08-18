@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
-    <property name="logging.path" value="d:/abc"/>
+    <!-- 从配置文件中读取文件存放路径 -->
+    <springProperty name="log.path" source="log.path" scope="context" />
+    <springProperty name="log.level" source="log.level" scope="context" />
+
+    <!-- 控制台颜色 -->
     <!-- black, highlight, gray, white, boldWhite, red, boldRed, green, boldGreen, yellow, boldYellow, blue, boldBlue,
     magenta(洋红), boldMagenta, cyan(青色), boldCyan, %()使用 -->
 
@@ -24,7 +28,7 @@
         <!--滚动策略-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--路径-->
-            <fileNamePattern>${logging.path}//info_%d.log</fileNamePattern>
+            <fileNamePattern>${log.path}//info_%d.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
     </appender>
@@ -39,7 +43,7 @@
         <!--滚动策略-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--路径-->
-            <fileNamePattern>${logging.path}//error_%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${log.path}//error_%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
     </appender>
@@ -62,7 +66,7 @@
         <appender-ref ref="ERROR-LOG"/>
     </appender>
 
-    <root level="info">
+    <root level="${log.level}">
         <appender-ref ref="CONSOLE-LOG" />
         <appender-ref ref="ASYNC-INFO"/>
         <appender-ref ref="ASYNC-ERROR"/>

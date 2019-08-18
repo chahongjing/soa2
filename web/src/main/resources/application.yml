@@ -67,4 +67,3 @@ logging:
     com:
       zjy:
         dao: DEBUG
-  path: d:/abc

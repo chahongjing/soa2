@@ -30,3 +30,6 @@ kafka:
 my:
   name: abc-online
   enabletwo: true
+log:
+  path: d:/abc/online
+  level: INFO

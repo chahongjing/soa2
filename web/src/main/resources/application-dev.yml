@@ -30,3 +30,6 @@ kafka:
 my:
   name: abc-dev
   enabletwo: true
+log:
+  path: d:/abc/dev
+  level: DEBUG
