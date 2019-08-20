@@ -6,10 +6,10 @@
     <parent>
         <groupId>com.zjy</groupId>
         <artifactId>soa2</artifactId>
-        <version>1.0</version>
+        <version>${project.version}</version>
     </parent>
     <artifactId>service-remote</artifactId>
-    <version>1.0</version>
+    <version>${project.version}</version>
     <name>service-remote</name>
     <description>Demo project for Spring Boot</description>
 
@@ -44,7 +44,7 @@
         <dependency>
             <groupId>com.zjy</groupId>
             <artifactId>api</artifactId>
-            <version>1.0</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -74,13 +74,13 @@
         <dependency>
             <groupId>com.zjy</groupId>
             <artifactId>service</artifactId>
-            <version>1.0</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.zjy</groupId>
             <artifactId>dao</artifactId>
-            <version>1.0</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
@@ -90,6 +90,23 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.source}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <!-- 配置构建时忽略测试用例 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
             </plugin>
         </plugins>
     </build>
