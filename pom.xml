@@ -26,6 +26,8 @@
         <module>service</module>
         <module>service-remote</module>
         <module>web</module>
+        <module>dao</module>
+        <module>domain</module>
     </modules>
 
     <properties>

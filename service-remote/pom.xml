@@ -8,7 +8,6 @@
         <artifactId>soa2</artifactId>
         <version>1.0</version>
     </parent>
-    <groupId>com.zjy</groupId>
     <artifactId>service-remote</artifactId>
     <version>1.0</version>
     <name>service-remote</name>
@@ -75,6 +74,12 @@
         <dependency>
             <groupId>com.zjy</groupId>
             <artifactId>service</artifactId>
+            <version>1.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.zjy</groupId>
+            <artifactId>dao</artifactId>
             <version>1.0</version>
             <scope>compile</scope>
         </dependency>
