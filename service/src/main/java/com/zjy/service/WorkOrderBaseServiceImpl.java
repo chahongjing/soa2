@@ -1,6 +1,8 @@
 package com.zjy.service;
 
+import com.zjy.dao.UserDao;
 import com.zjy.enums.WorkOrderType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -11,14 +13,16 @@ import org.springframework.stereotype.Service;
 @Primary
 public class WorkOrderBaseServiceImpl implements WorkOrderBaseService {
 
-
     private WorkOrderType workOrderType = WorkOrderType.DEFAULT;
+
+    @Autowired
+    protected UserDao userDao;
 
     public WorkOrderType getWorkOrderType() {
         return workOrderType;
     }
 
-    public void setWorkOrderType(WorkOrderType type) {
+    protected void setWorkOrderType(WorkOrderType type) {
         workOrderType = type;
     }
 

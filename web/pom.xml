@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.zjy</groupId>
         <artifactId>soa2</artifactId>
-        <version>${project.version}</version>
+        <version>1.0</version>
     </parent>
     <artifactId>web</artifactId>
     <version>${project.version}</version>
@@ -33,7 +33,6 @@
         <!--        <dependency>-->
         <!--            <groupId>com.alibaba</groupId>-->
         <!--            <artifactId>dubbo</artifactId>-->
-        <!--            <scope>compile</scope>-->
         <!--            <exclusions>-->
         <!--                <exclusion>-->
         <!--                    <artifactId>spring</artifactId>-->

@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.zjy</groupId>
         <artifactId>soa2</artifactId>
-        <version>${project.version}</version>
+        <version>1.0</version>
     </parent>
     <artifactId>service</artifactId>
     <version>${project.version}</version>
@@ -29,7 +29,6 @@
 <!--        <dependency>-->
 <!--            <groupId>com.alibaba</groupId>-->
 <!--            <artifactId>dubbo</artifactId>-->
-<!--            <scope>compile</scope>-->
 <!--            <exclusions>-->
 <!--                <exclusion>-->
 <!--                    <artifactId>spring</artifactId>-->
@@ -46,7 +45,6 @@
             <groupId>com.zjy</groupId>
             <artifactId>api</artifactId>
             <version>${project.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
@@ -76,7 +74,16 @@
             <groupId>com.zjy</groupId>
             <artifactId>domain</artifactId>
             <version>${project.version}</version>
-            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.zjy</groupId>
+            <artifactId>dao</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zjy</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

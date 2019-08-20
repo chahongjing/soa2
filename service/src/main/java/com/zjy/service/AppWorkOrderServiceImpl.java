@@ -13,6 +13,6 @@ public class AppWorkOrderServiceImpl extends WorkOrderBaseServiceImpl implements
 
     @PostConstruct
     public void AfterSaleWorkOrderController() {
-        setWorkOrderType(WorkOrderType.APP);
+        super.setWorkOrderType(WorkOrderType.APP);
     }
 }
