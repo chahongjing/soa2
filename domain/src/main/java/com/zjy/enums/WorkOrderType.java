@@ -1,7 +1,7 @@
 package com.zjy.enums;
 
 /**
- * TODO
+ *
  */
 public enum WorkOrderType {
     DEFAULT(0, "默认"),

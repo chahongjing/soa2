@@ -3,7 +3,7 @@ package com.zjy.mystarter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * TODO
+ *
  */
 @ConfigurationProperties(prefix = "my")
 public class MyProperties {

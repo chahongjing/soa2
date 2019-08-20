@@ -9,17 +9,18 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>domain</artifactId>
-    <packaging>jar</packaging>
+    <artifactId>common</artifactId>
 
-    <name>domain</name>
+    <name>common</name>
     <url>http://www.example.com</url>
 
     <dependencies>
+
     </dependencies>
 
     <build>
         <pluginManagement>
+
         </pluginManagement>
     </build>
 </project>

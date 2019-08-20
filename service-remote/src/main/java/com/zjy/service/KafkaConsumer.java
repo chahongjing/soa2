@@ -7,7 +7,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 /**
- * TODO
+ *
  */
 @Component
 public class KafkaConsumer {
