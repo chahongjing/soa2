@@ -13,21 +13,21 @@
 
     <groupId>com.zjy</groupId>
     <artifactId>soa2</artifactId>
-    <version>${project.version}</version>
+    <version>1.0</version>
     <packaging>pom</packaging>
 
     <name>soa2</name>
     <url>http://www.example.com</url>
 
     <modules>
-        <module>api</module>
         <module>mystarter</module>
+        <module>common</module>
+        <module>domain</module>
+        <module>dao</module>
         <module>service</module>
+        <module>api</module>
         <module>service-remote</module>
         <module>web</module>
-        <module>dao</module>
-        <module>domain</module>
-        <module>common</module>
     </modules>
 
     <properties>
