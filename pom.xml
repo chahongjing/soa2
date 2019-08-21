@@ -139,6 +139,7 @@
                     <configuration>
                         <source>${maven.compiler.source}</source>
                         <target>${maven.compiler.source}</target>
+                        <compilerVersion>${maven.compiler.source}</compilerVersion>
                         <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
                 </plugin>
