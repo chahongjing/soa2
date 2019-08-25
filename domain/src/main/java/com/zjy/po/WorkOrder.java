@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * 
  * @author jyzeng
- * @date 2019-08-25 14:41:55
+ * @date 2019-08-25 14:44:01
  */
 public class WorkOrder implements Serializable {
     /**
