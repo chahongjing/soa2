@@ -3,7 +3,6 @@ package com.zjy.dao;
 import com.zjy.po.User;
 import org.springframework.stereotype.Repository;
 
-@Repository
 public interface UserDao {
     User get(Long id);
 

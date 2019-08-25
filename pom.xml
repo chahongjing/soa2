@@ -46,6 +46,8 @@
         <kafka-version>2.2.7.RELEASE</kafka-version>
         <redis>2.1.6.RELEASE</redis>
         <project.version>1.0</project.version>
+        <common.lang3>3.9</common.lang3>
+        <common.beanutils>1.9.4</common.beanutils>
 
         <maven.compile>3.8.1</maven.compile>
         <maven.surefire>3.0.0-M3</maven.surefire>
@@ -121,6 +123,16 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-data-redis</artifactId>
                 <version>${redis}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${common.lang3}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${common.beanutils}</version>
             </dependency>
 
         </dependencies>

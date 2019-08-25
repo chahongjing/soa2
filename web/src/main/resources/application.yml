@@ -59,7 +59,7 @@ spring:
           max-active: 200
 
 mybatis:
-  mapper-locations: classpath:mybatis/*.xml
+  mapper-locations: classpath:mybatis/com/zjy/dao/*.xml
   type-aliases-package: com.zjy.po
 
 logging:
