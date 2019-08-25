@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface BaseService<T, S> {
 
-    int countByCondition(S example);
+    long countByCondition(S example);
 
     int deleteByCondition(S example);
 

@@ -14,9 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("workOrderBase")
-public class WorkOrderBaseController {
-
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
+public class WorkOrderBaseController extends BaseController {
 
     @Autowired
     protected WorkOrderBaseService workOrderService;
@@ -26,8 +24,8 @@ public class WorkOrderBaseController {
     }
 
     @GetMapping("test")
-    public String test() {
-        logger.info("主要用来进行测试");
+    public String test(String abc) {
+        logger.info("主要用来进行测试" + abc);
         return workOrderService.myBaseMethod();
     }
 }

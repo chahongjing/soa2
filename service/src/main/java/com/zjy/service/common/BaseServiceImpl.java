@@ -28,7 +28,7 @@ public class BaseServiceImpl<Dao extends BaseDao<T, S>, T, S> implements BaseSer
      */
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public int countByCondition(S example) {
+    public long countByCondition(S example) {
         return dao.countByCondition(example);
     }
 

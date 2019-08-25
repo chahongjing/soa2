@@ -11,7 +11,7 @@ import java.util.List;
  * @create 2016-12-10 13:36
  */
 public interface BaseDao<T, S> {
-    int countByCondition(S example);
+    long countByCondition(S example);
 
     int deleteByCondition(S example);
 
