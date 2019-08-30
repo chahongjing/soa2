@@ -2,8 +2,7 @@ package com.zjy.service;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.zjy.api.TestApi;
-import com.zjy.dao.UserDao;
-import com.zjy.po.User;
+import com.zjy.po.MyUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +13,9 @@ import org.springframework.stereotype.Component;
 @Component
 //@Service
 public class TestApiImpl implements TestApi {
+
     @Autowired
-    private UserDao userDao;
+    private MyUserService myUserService;
     @Autowired
     private RedisService redisService;
 
@@ -23,7 +23,7 @@ public class TestApiImpl implements TestApi {
     public String test() {
         redisService.set("mykey", "test");
         System.out.println("from redis: " + redisService.get("mykey"));
-        User user = userDao.get(1L);
+        MyUser myUser = myUserService.selectById(1L);
         return "zjy11";
     }
 

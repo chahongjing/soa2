@@ -2,6 +2,8 @@ package com.zjy.web;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.zjy.api.TestApi;
+import com.zjy.po.MyUser;
+import com.zjy.service.MyUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class IndexController {
 
     @Autowired
     private KafkaProducer kafkaProducer;
+
+    @Autowired
+    private MyUserService myUserService;
 
     @GetMapping("index")
     public Map test() {
