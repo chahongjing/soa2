@@ -57,6 +57,12 @@ spring:
       jedis:
         pool:
           max-active: 200
+  thymeleaf:
+    cache: true
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
 
 mybatis:
   mapper-locations: classpath:mybatis/com/zjy/dao/*.xml
