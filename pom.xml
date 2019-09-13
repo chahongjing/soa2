@@ -48,6 +48,7 @@
         <project.version>1.0</project.version>
         <common.lang3>3.9</common.lang3>
         <common.beanutils>1.9.4</common.beanutils>
+        <commons.pool2>2.7.0</commons.pool2>
 
         <maven.compile>3.8.1</maven.compile>
         <maven.surefire>3.0.0-M3</maven.surefire>
@@ -66,6 +67,23 @@
                 <artifactId>dubbo-spring-boot-starter</artifactId>
                 <version>${dubbo.starter}</version>
             </dependency>
+            <!-- 分页插件 -->
+            <dependency>
+                <groupId>com.github.pagehelper</groupId>
+                <artifactId>pagehelper-spring-boot-starter</artifactId>
+                <version>${pagehelper-springboot}</version>
+            </dependency>
+            <!-- alibaba的druid数据库连接池 -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid-springboot}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-springboot}</version>
+            </dependency>
 <!--            <dependency>-->
 <!--                <groupId>com.alibaba</groupId>-->
 <!--                <artifactId>dubbo</artifactId>-->
@@ -77,11 +95,6 @@
 <!--                    </exclusion>-->
 <!--                </exclusions>-->
 <!--            </dependency>-->
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
-                <version>${fastjson}</version>
-            </dependency>
             <dependency>
                 <groupId>com.101tec</groupId>
                 <artifactId>zkclient</artifactId>
@@ -98,11 +111,10 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.mybatis.spring.boot</groupId>
-                <artifactId>mybatis-spring-boot-starter</artifactId>
-                <version>${mybatis-springboot}</version>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson}</version>
             </dependency>
-
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
@@ -110,29 +122,10 @@
                 <scope>runtime</scope>
             </dependency>
 
-            <!-- 分页插件 -->
-            <dependency>
-                <groupId>com.github.pagehelper</groupId>
-                <artifactId>pagehelper-spring-boot-starter</artifactId>
-                <version>${pagehelper-springboot}</version>
-            </dependency>
-            <!-- alibaba的druid数据库连接池 -->
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>druid-spring-boot-starter</artifactId>
-                <version>${druid-springboot}</version>
-            </dependency>
-
             <dependency>
                 <groupId>org.springframework.kafka</groupId>
                 <artifactId>spring-kafka</artifactId>
                 <version>${kafka-version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-data-redis</artifactId>
-                <version>${redis}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -143,6 +136,11 @@
                 <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
                 <version>${common.beanutils}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-pool2</artifactId>
+                <version>${commons.pool2}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

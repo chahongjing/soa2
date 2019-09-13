@@ -4,7 +4,7 @@ server:
 spring:
   dubbo:
     application:
-      name: provider
+      name: my-provider
     server: true
     registry:
       address: zookeeper://127.0.0.1:2181
@@ -32,9 +32,15 @@ spring:
     password:
     port: 6379
     timeout: 1000
-    jedis:
+    lettuce:
       pool:
-        max-active: 200
+        max-active: 8
+        max-idle: 5
+        min-idle: 0
+  data:
+    mongodb:
+      uri: mongodb://username:password@192.168.1.1:20000,192.168.1.2:20000,192.168.252.12:20000/test
+
 mybatis:
   mapper-locations: classpath:mybatis/com/zjy/dao/*.xml
   type-aliases-package: com.zjy.po
@@ -47,3 +53,4 @@ logging:
 
 kafka:
   topic: test20180430
+

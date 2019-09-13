@@ -48,17 +48,25 @@ spring:
     driverClassName: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/toolsitemvc4j?useUnicode=true&characterEncoding=utf-8&noDatetimeStringSync=true&serverTimezone=Hongkong
     username: root
-    redis:
-      database: 0
-      host: 127.0.0.1
-      password:
-      port: 6379
-      timeout: 1000
-      jedis:
-        pool:
-          max-active: 200
+  dubbo:
+    application:
+      name: my-provider
+  redis:
+    database: 0
+    host: 127.0.0.1
+    password:
+    port: 6379
+    timeout: 1000
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 5
+        min-idle: 0
+#    jedis:
+#      pool:
+#        max-active: 200
   thymeleaf:
-    cache: true
+    cache: false
   devtools:
     restart:
       enabled: true
@@ -67,9 +75,14 @@ spring:
 mybatis:
   mapper-locations: classpath:mybatis/com/zjy/dao/*.xml
   type-aliases-package: com.zjy.po
+#  type-handlers-package: com.dmall.wsnw.common
 
 logging:
   level:
     com:
       zjy:
         dao: DEBUG
+    io:
+      lettuce:
+        core: error
+      netty: error
