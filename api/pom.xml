@@ -13,5 +13,4 @@
     <version>${project.version}</version>
     <packaging>jar</packaging>
     <name>api</name>
-    <description>Demo project for Spring Boot</description>
 </project>

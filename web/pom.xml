@@ -7,10 +7,11 @@
         <artifactId>soa2</artifactId>
         <version>1.0</version>
     </parent>
+
     <artifactId>web</artifactId>
     <version>${project.version}</version>
     <name>web</name>
-    <description>Demo project for Spring Boot</description>
+    <description>chahongjing web</description>
 
     <dependencies>
         <dependency>
@@ -28,6 +29,7 @@
             <artifactId>mystarter</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -61,6 +63,16 @@
         <dependency>
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.kafka</groupId>
@@ -120,5 +132,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

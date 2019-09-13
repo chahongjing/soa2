@@ -13,5 +13,4 @@
     <version>${project.version}</version>
 
     <name>common</name>
-    <url>http://www.example.com</url>
 </project>

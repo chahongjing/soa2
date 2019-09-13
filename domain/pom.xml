@@ -14,5 +14,4 @@
     <version>${project.version}</version>
 
     <name>domain</name>
-    <url>http://www.example.com</url>
 </project>
