@@ -12,4 +12,4 @@
 |mystarter||自定义starter|
 ### 多环境配置
 1. maven打包时可以指定参数，如-P test,则为指定打test环境配置。
-2. 运行时指定运行环境，如java -jar -web-1.0.jar --spring.profiles.active=online。当使用此参数时无论maven打包为何种环境都会失效，统一以这里指定的为准
+2. 运行时指定运行环境，如java -jar web-1.0.jar --spring.profiles.active=online。当使用此参数时无论maven打包为何种环境都会失效，统一以这里指定的为准
