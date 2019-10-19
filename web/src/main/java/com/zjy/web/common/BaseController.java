@@ -1,4 +1,4 @@
-package com.zjy.web;
+package com.zjy.web.common;
 
 import com.zjy.service.common.MyCustomDateEditor;
 import org.slf4j.Logger;

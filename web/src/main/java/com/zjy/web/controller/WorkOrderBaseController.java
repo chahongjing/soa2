@@ -1,9 +1,8 @@
-package com.zjy.web;
+package com.zjy.web.controller;
 
 import com.zjy.enums.WorkOrderType;
 import com.zjy.service.WorkOrderBaseService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.zjy.web.common.BaseController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

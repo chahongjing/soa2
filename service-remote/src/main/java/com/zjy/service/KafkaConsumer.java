@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class KafkaConsumer {
+//    KafkaProducer<String, String> KafkaConsumer<String, String>
     @KafkaListener(topics = {"${kafka.topic}"})
     public void receive(@Payload String message, @Headers MessageHeaders headers) {
         System.out.println("KafkaMessageConsumer 接收到消息：" + message);

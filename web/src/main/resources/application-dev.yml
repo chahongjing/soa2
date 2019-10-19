@@ -23,6 +23,8 @@ spring:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
       group-id: test-consumer-group
+      key-deserializer: org.apache.kafka.common.serialization.StringSerializer
+      value-deserializer: org.apache.kafka.common.serialization.StringSerializer
       enable-auto-commit: true
       auto-commit-interval: 1000
 kafka:

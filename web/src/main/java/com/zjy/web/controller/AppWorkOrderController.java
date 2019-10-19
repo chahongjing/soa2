@@ -1,4 +1,4 @@
-package com.zjy.web;
+package com.zjy.web.controller;
 
 import com.zjy.service.AppWorkOrderService;
 import org.springframework.beans.factory.annotation.Autowired;

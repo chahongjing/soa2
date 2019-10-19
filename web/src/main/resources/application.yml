@@ -76,6 +76,8 @@ mybatis:
   mapper-locations: classpath:mybatis/com/zjy/dao/*.xml
   type-aliases-package: com.zjy.po
 #  type-handlers-package: com.dmall.wsnw.common
+pagehelper:
+  helperDialect: mysql
 
 logging:
   level:

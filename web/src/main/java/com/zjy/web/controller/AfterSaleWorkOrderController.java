@@ -1,4 +1,4 @@
-package com.zjy.web;
+package com.zjy.web.controller;
 
 import com.zjy.service.AfterSaleWorkOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
