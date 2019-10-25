@@ -1,0 +1,15 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: Admin Server
+  boot:
+    admin:
+      client:
+        url: http://localhost:8085
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'

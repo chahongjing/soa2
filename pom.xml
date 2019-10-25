@@ -26,6 +26,7 @@
         <module>api</module>
         <module>service-remote</module>
         <module>web</module>
+        <module>springboot-admin</module>
     </modules>
 
     <properties>
