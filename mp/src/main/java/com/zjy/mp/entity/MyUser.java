@@ -2,12 +2,14 @@ package com.zjy.mp.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.zjy.mp.enums.Sex;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * TODO
  */
-@Data
+@Getter
+@Setter
 @TableName("myuser")
 public class MyUser {
     private String id;
