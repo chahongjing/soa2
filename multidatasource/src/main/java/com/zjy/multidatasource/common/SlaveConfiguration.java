@@ -17,7 +17,7 @@ import javax.sql.DataSource;
  *
  */
 @Configuration
-@MapperScan(basePackages = {"com.zjy.slavedao"}, sqlSessionFactoryRef = "sqlSessionSlave")
+@MapperScan(basePackages = {DataSourceConfiguration.SLAVE_DAO_PACKAGE}, sqlSessionFactoryRef = "sqlSessionSlave")
 public class SlaveConfiguration {
     @Autowired
     @Qualifier("slaveDb")
@@ -25,9 +25,17 @@ public class SlaveConfiguration {
 
     @Bean
     public SqlSessionFactory sqlSessionSlave() throws Exception {
+//        MybatisSqlSessionFactoryBean b = new MybatisSqlSessionFactoryBean();
+//        b.setDataSource(slaveDb);
+//        b.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(DataSourceConfiguration.SLAVE_MAPPER_LOCATION));
+//        b.setTypeAliasesPackage(DataSourceConfiguration.TYPE_ALIASE);
+//        b.setTypeEnumsPackage(DataSourceConfiguration.TYPE_ENUM_PACKAGE);
+//        b.setVfs(SpringBootVFS.class);
+//        return b.getObject();
+
         SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
         factoryBean.setDataSource(slaveDb);
-        factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(DataSourceConfiguration.MAPPER_LOCATION));
+        factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(DataSourceConfiguration.SLAVE_MAPPER_LOCATION));
         factoryBean.setTypeAliasesPackage(DataSourceConfiguration.TYPE_ALIASE);
         factoryBean.setVfs(SpringBootVFS.class);
         return factoryBean.getObject();

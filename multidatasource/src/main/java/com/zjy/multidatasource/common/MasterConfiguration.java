@@ -18,7 +18,7 @@ import javax.sql.DataSource;
  */
 @Configuration
 // 指定com.zjy.daos包下的mapper都使用sqlSessionMaster数据源
-@MapperScan(basePackages = {"com.zjy.dao"}, sqlSessionFactoryRef = "sqlSessionMaster")
+@MapperScan(basePackages = {DataSourceConfiguration.MASTER_DAO_PACKAGE}, sqlSessionFactoryRef = "sqlSessionMaster")
 public class MasterConfiguration {
     @Autowired
     private DataSource masterDb;
@@ -26,9 +26,17 @@ public class MasterConfiguration {
     @Bean
     @Primary
     public SqlSessionFactory sqlSessionMaster() throws Exception {
+//        MybatisSqlSessionFactoryBean b = new MybatisSqlSessionFactoryBean();
+//        b.setDataSource(masterDb);
+//        b.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(DataSourceConfiguration.MASTER_MAPPER_LOCATION));
+//        b.setTypeAliasesPackage(DataSourceConfiguration.TYPE_ALIASE);
+//        b.setTypeEnumsPackage(DataSourceConfiguration.TYPE_ENUM_PACKAGE);
+//        b.setVfs(SpringBootVFS.class);
+//        return b.getObject();
+
         SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
         factoryBean.setDataSource(masterDb);
-        factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(DataSourceConfiguration.MAPPER_LOCATION));
+        factoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(DataSourceConfiguration.MASTER_MAPPER_LOCATION));
         factoryBean.setTypeAliasesPackage(DataSourceConfiguration.TYPE_ALIASE);
         factoryBean.setTypeHandlersPackage(DataSourceConfiguration.TYPE_HANDLE_PACKAGE);
         factoryBean.setVfs(SpringBootVFS.class);
