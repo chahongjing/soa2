@@ -1,0 +1,5 @@
+spring:
+  elasticsearch:
+    rest:
+      uris: 127.0.0.1:9200
+##      cluster-nodes: hadoop137:9300,hadoop138:9300,hadoop139:9300
