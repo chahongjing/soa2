@@ -37,11 +37,11 @@ public class StudentServiceImpl implements StudentService {
         scores.add(27.2);
         scores.add(56.2);
 
-        studentDao.save(new Student(UUID.randomUUID().toString(), "刘伯", 21, scores ));
-        studentDao.save(new Student(UUID.randomUUID().toString(), "刘思想", 35, scores ));
-        studentDao.save(new Student(UUID.randomUUID().toString(), "王皮皮", 45, scores ));
-        studentDao.save(new Student(UUID.randomUUID().toString(), "王二丫", 23, scores ));
-        studentDao.save(new Student(UUID.randomUUID().toString(), "王铁蛋", 51, scores ));
+        studentDao.save(new Student(1L, "刘伯", 21, scores ));
+        studentDao.save(new Student(2L, "刘思想", 35, scores ));
+        studentDao.save(new Student(3L, "王皮皮", 45, scores ));
+        studentDao.save(new Student(4L, "王二丫", 23, scores ));
+        studentDao.save(new Student(5L, "王铁蛋", 51, scores ));
     }
 
     @Override

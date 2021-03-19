@@ -10,35 +10,34 @@ import java.util.List;
 @Document(indexName = "student_index", type = "student")
 public class Student {
     @Id
-    @Field(type= FieldType.Auto)
-    private String studentId;
+    @Field(type = FieldType.Long)
+    private Long studentId;
 
-    @Override
-    public String toString() {
-        return "Student{" +
-                "studentId='" + studentId + '\'' +
-                ", name='" + name + '\'' +
-                ", age=" + age +
-                ", scores=" + scores +
-                '}';
+    @Field(type = FieldType.Text)
+    private String name;
+
+    @Field(type = FieldType.Integer)
+    private Integer age;
+
+    @Field(type = FieldType.Auto)
+    private List<Double> scores;
+
+    public Student() {
+
     }
 
-    public Student(String studentId, String name, Integer age, List<Double> scores) {
+    public Student(Long studentId, String name, Integer age, List<Double> scores) {
         this.studentId = studentId;
         this.name = name;
         this.age = age;
         this.scores = scores;
     }
 
-    public Student() {
-
-    }
-
-    public String getStudentId() {
+    public Long getStudentId() {
         return studentId;
     }
 
-    public void setStudentId(String studentId) {
+    public void setStudentId(Long studentId) {
         this.studentId = studentId;
     }
 
@@ -66,12 +65,13 @@ public class Student {
         this.scores = scores;
     }
 
-    @Field(type=FieldType.Auto)
-    private String name;
-
-    @Field(type=FieldType.Auto)
-    private Integer age;
-
-    @Field(type=FieldType.Auto)
-    private List<Double> scores;
+    @Override
+    public String toString() {
+        return "Student{" +
+                "studentId='" + studentId + '\'' +
+                ", name='" + name + '\'' +
+                ", age=" + age +
+                ", scores=" + scores +
+                '}';
+    }
 }
