@@ -14,7 +14,7 @@
 |mybatis-plus-starter|[【git docs】](https://gitee.com/baomidou/mybatisplus-spring-boot)|||
 |dubbo-admin|||
 |[multidatasource 8080](http://localhost:8080)| |多数据源配置，打war包|
-|esdemo| |es demo 使用7.11.2版本的es|
+|esdemo| |es demo 使用6.2.2版本的es|
 ### 多环境配置
 1. maven打包时可以指定参数，如-P test,则为指定打test环境配置。
 2. 运行时指定运行环境，如java -jar web-1.0.jar --spring.profiles.active=online。当使用此参数时无论maven打包为何种环境都会失效，统一以这里指定的为准
