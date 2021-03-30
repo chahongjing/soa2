@@ -30,6 +30,7 @@
         <module>mp</module>
         <module>multidatasource</module>
         <module>esdemo</module>
+        <module>rocketmq</module>
     </modules>
 
     <properties>

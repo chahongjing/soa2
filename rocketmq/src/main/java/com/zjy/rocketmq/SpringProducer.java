@@ -15,19 +15,6 @@ public class SpringProducer {
     public void sendMsg(String topic, String msg) {
         System.out.println("发送报文：" + msg);
         this.rocketMQTemplate.convertAndSend(topic, msg);
-//        this.rocketMQTemplate.asyncSend(topic, MessageBuilder.withPayload(msg).build(), new SendCallback() {
-//            @Override
-//            public void onSuccess(SendResult sendResult) {
-//                // 处理消息发送成功逻辑
-//                System.out.println("服务端得知消息消费成功！");
-//            }
-//
-//            @Override
-//            public void onException(Throwable e) {
-//                // 处理消息发送异常逻辑
-//                System.out.println("服务端得知消息消费失败！");
-//            }
-//        });
     }
 
     /**
