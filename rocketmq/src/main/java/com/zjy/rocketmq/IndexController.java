@@ -17,6 +17,6 @@ public class IndexController {
     @GetMapping("/test")
     public void test(String msg) {
 //        springProducer.sendMsg(topic, "这是生产者发的消息！" + msg);
-        springProducer.sendMsg1(topic1, "这是生产者发的消息！" + msg);
+        springProducer.sendAsyncMsg(topic1, "这是生产者发的消息！" + msg);
     }
 }

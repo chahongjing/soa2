@@ -35,22 +35,30 @@ public class SpringProducer {
      */
     public void sendMsg1(String topic, String msgBody) {
         System.out.println("发送mq消息" + msgBody);
-        rocketMQTemplate.syncSend(topic, MessageBuilder.withPayload(msgBody).build());
+        UserInfo user = new UserInfo();
+        user.setId(3L);
+        user.setName(msgBody);
+        rocketMQTemplate.syncSend(topic, MessageBuilder.withPayload(user).build());
     }
 
     /**
      * 发送异步消息 在SendCallback中可处理相关成功失败时的逻辑
      */
     public void sendAsyncMsg(String topic, String msgBody) {
-        rocketMQTemplate.asyncSend("queue_test_topic", MessageBuilder.withPayload(msgBody).build(), new SendCallback() {
+        UserInfo user = new UserInfo();
+        user.setId(3L);
+        user.setName(msgBody);
+        rocketMQTemplate.asyncSend(topic, MessageBuilder.withPayload(user).build(), new SendCallback() {
             @Override
             public void onSuccess(SendResult sendResult) {
                 // 处理消息发送成功逻辑
+                System.out.println("消息发送成功回调！");
             }
 
             @Override
             public void onException(Throwable e) {
                 // 处理消息发送异常逻辑
+                System.out.println("消息发送失败回调！");
             }
         });
     }
