@@ -24,4 +24,4 @@
 |web|kafka生产者|
 |service-remote|kafka消费者|
 |rocketmq|rocketmq|
-|javaagent|agent的demo，install后执行`java -javaagent:agentTest.jar com.zjy.App`|
+|javaagent|agent的demo，install后执行`java -javaagent:agentTest.jar com.zjy.App`或`java -javaagent:agentTest.jar -jar agentTest.jar`<br>如果是先运行应用程序，则可以使用这些代码附加运行agent`-- 15186表示目标进程的PID；VirtualMachine vm = VirtualMachine.attach("15186");  vm.loadAgent(".../agent.jar");vm.detach();|
