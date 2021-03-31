@@ -24,3 +24,4 @@
 |web|kafka生产者|
 |service-remote|kafka消费者|
 |rocketmq|rocketmq|
+|javaagent|agent的demo，install后执行`java -javaagent:agentTest.jar com.zjy.App`|
