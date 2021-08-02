@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: webApp
+server:
+  port: 8086

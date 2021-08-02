@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: web
   profiles:
     active: @profiles.active@
   datasource:
