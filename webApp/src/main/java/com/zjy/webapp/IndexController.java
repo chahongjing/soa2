@@ -23,7 +23,12 @@ public class IndexController {
         log.debug("这是debug日志!");
         log.info("这是info日志!");
         log.warn("这是warn日志!");
-        log.error("这是error日志!");
+        try {
+            int a = 1, b = 0;
+            int c = a / b;
+        }catch (Exception e) {
+            log.error("这是error日志!", e);
+        }
         map.put("msg", "访问成功!");
         return map;
     }
