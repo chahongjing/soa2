@@ -6,11 +6,18 @@
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
     <contextName>logback</contextName>
 
+    <appender name="CONSOLE-LOG" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>[%red(%d{yyyy-MM-dd' 'HH:mm:ss.sss})] [%highlight(%-5p)] [%t] [%C] [%L] %m%n</pattern>
+        </layout>
+    </appender>
+
     <appender name="stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>127.0.0.1:4560</destination>
         <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">
+            <provider class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.logstash.TraceIdJsonProvider" />
             <customFields>{"myvar": "${appName}"}</customFields>
-            <includeMdcKeyName>tid</includeMdcKeyName>
+            <includeMdcKeyName>ttid</includeMdcKeyName>
         </encoder>
     </appender>
 

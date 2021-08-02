@@ -39,3 +39,5 @@ http.port: 9200
 
 ### 配置
 1. 首次访问，先在访问服务生成日志，再访问kibana-->discover，填写logstash中配置(output)的日志index:applog，下一步选择@timestamp,保存。然后再进入discory就可以看到日志了
+
+java -javaagent:/home/mi/下载/apache-skywalking-apm-8.6.0/apache-skywalking-apm-bin/agent/skywalking-agent.jar -Dskywalking.agent.service_name=test -jar /home/mi/workspace/code/my/soa2/webApp/target/webApp-0.0.1-SNAPSHOT.jar

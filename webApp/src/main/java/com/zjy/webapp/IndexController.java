@@ -1,6 +1,7 @@
 package com.zjy.webapp;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.skywalking.apm.toolkit.trace.TraceContext;
 import org.slf4j.MDC;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +18,9 @@ public class IndexController {
 
     @GetMapping("index")
     public Map test(Integer id) {
-        MDC.put("tid", UUID.randomUUID().toString());
+        MDC.put("ttid", UUID.randomUUID().toString());
+
+        MDC.put("ttttid", TraceContext.traceId());
         Map<String, String> map = new HashMap<>();
         log.trace("这是trace日志!");
         log.debug("这是debug日志!");

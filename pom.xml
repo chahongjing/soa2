@@ -151,15 +151,15 @@
                 <version>1.18.20</version>
             </dependency>
             <!-- 这里我使用的是elasticsearch的high-level-client 版本要和你的elasticsearch版本对应-->
-            <dependency>
-                <groupId>org.elasticsearch.client</groupId>
-                <artifactId>elasticsearch-rest-high-level-client</artifactId>
-                <version>7.4.2</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>org.elasticsearch.client</groupId>-->
+<!--                <artifactId>elasticsearch-rest-high-level-client</artifactId>-->
+<!--                <version>7.4.2</version>-->
+<!--            </dependency>-->
             <dependency>
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
-                <version>5.2</version>
+                <version>6.6</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
