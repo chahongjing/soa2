@@ -43,6 +43,35 @@ public class TestController {
         return "success";
     }
 
+    @RequestMapping("insert")
+    public String insert() {
+        studentService.insertDoc("student_index");
+        return "success";
+    }
+
+    @RequestMapping("update")
+    public String update(long id, int age) {
+        studentService.update("student_index", id, age);
+        return "success";
+    }
+
+    @RequestMapping("delete")
+    public String delete(String id) {
+        studentService.deleteDoc("student_index", id);
+        return "success";
+    }
+
+    @RequestMapping("batchInsertDoc")
+    public String batchInsertDoc() {
+        studentService.batchInsertDoc("student_index");
+        return "success";
+    }
+
+    @RequestMapping("search")
+    public List<Student> search() {
+        return studentService.search();
+    }
+
     @RequestMapping("createIndex")
     public String createIndex(String index) {
         studentService.createIndex(index);
@@ -53,10 +82,5 @@ public class TestController {
     public String deleteIndex(String index) {
         studentService.deleteIndex(index);
         return "success";
-    }
-
-    @RequestMapping("search")
-    public List<Student> search() {
-        return studentService.search();
     }
 }

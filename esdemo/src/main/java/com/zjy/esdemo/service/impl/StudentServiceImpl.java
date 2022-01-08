@@ -59,11 +59,11 @@ public class StudentServiceImpl implements StudentService {
         scores.add(27.2);
         scores.add(56.2);
 
-        studentDao.save(new Student(1L, "刘伯", 21, scores, new Date(2022 - 1900, 1 - 1, 2, 3, 4, 5)));
-        studentDao.save(new Student(2L, "刘思想", 35, scores, new Date(2022 - 1900, 1 - 1, 3, 7, 5, 35)));
-        studentDao.save(new Student(3L, "王皮皮", 45, scores, new Date(2022 - 1900, 1 - 1, 4, 8, 24, 45)));
-        studentDao.save(new Student(4L, "王二丫", 23, scores, new Date(2022 - 1900, 1 - 1, 5, 19, 54, 32)));
-        studentDao.save(new Student(5L, "王铁蛋", 51, scores, new Date(2022 - 1900, 1 - 1, 6, 12, 33, 18)));
+        studentDao.save(new Student(1L, "刘伯", 21, scores, new Date(2022 - 1900, Calendar.JANUARY, 2, 3, 4, 5)));
+        studentDao.save(new Student(2L, "刘思想", 35, scores, new Date(2022 - 1900, Calendar.JANUARY, 3, 7, 5, 35)));
+        studentDao.save(new Student(3L, "王皮皮", 45, scores, new Date(2022 - 1900, Calendar.JANUARY, 4, 8, 24, 45)));
+        studentDao.save(new Student(4L, "王二丫", 23, scores, new Date(2022 - 1900, Calendar.JANUARY, 5, 19, 54, 32)));
+        studentDao.save(new Student(5L, "王铁蛋", 51, scores, new Date(2022 - 1900, Calendar.JANUARY, 6, 12, 33, 18)));
     }
 
     @Override
@@ -92,6 +92,34 @@ public class StudentServiceImpl implements StudentService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void update(String index, long id, int age) {
+        esUtils.updateDoc2(index, String.valueOf(id), age);
+    }
+
+    @Override
+    public void insertDoc(String index) {
+        Student student = new Student(6L, "黄金", 65, new ArrayList<>(), new Date(2022 - 1900, Calendar.FEBRUARY, 5, 23, 52, 18));
+        esUtils.insertDoc(index, student.getStudentId().toString(), student);
+    }
+
+    @Override
+    public void deleteDoc(String index, String id) {
+        esUtils.deleteDoc(index, id);
+    }
+
+    @Override
+    public void batchInsertDoc(String index) {
+        List<Student> list = new ArrayList<>();
+        Student student = new Student(7L, "黄金", 65, new ArrayList<>(), new Date(2022 - 1900, Calendar.APRIL, 5, 23, 52, 18));
+        student.setBirthday(null);
+        list.add(student);
+        student = new Student(8L, "白银", 34, new ArrayList<>(), new Date(2022 - 1900, Calendar.APRIL, 27, 6, 29, 41));
+        student.setBirthday(null);
+        list.add(student);
+        esUtils.bulkInsert(index, list);
     }
 
 
@@ -145,15 +173,5 @@ public class StudentServiceImpl implements StudentService {
             studentList.add(student);
         }
         return studentList;
-    }
-
-    //批量插入
-    public void bulkInsert(List<Student> studentList) {
-        List<String> jsonList = new ArrayList<>();
-        for (Student student : studentList) {
-            // student 转为 Json字符串
-            jsonList.add(JSONObject.toJSONString(student));
-        }
-        BulkResponse bulkResponse = esUtils.bulkInsert(jsonList, "student_index");
     }
 }
