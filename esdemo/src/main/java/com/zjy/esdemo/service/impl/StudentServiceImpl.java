@@ -9,6 +9,7 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.text.Text;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -23,6 +24,7 @@ import org.springframework.util.CollectionUtils;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,9 +77,18 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public void deleteIndex() {
+    public void createIndex(String index) {
         try {
-            esUtils.deleteIndex("student_index");
+            esUtils.createIndex(index);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void deleteIndex(String index) {
+        try {
+            esUtils.deleteIndex(index);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -86,15 +97,16 @@ public class StudentServiceImpl implements StudentService {
 
     //查询
     public List<Student> search() {
-        // user_city 完全匹配 Beijing 且 (2020-6-1 <= user_time <= 2020-6-2)
         QueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery("name", "王"))
                 .must(QueryBuilders.rangeQuery("birthday").gte(new Date(2022 - 1900, 1 - 1, 4, 8, 24, 45).getTime()))
                 .must(QueryBuilders.rangeQuery("birthday").lte(new Date(2022 - 1900, 1 - 1, 5, 19, 54, 32).getTime()));
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(queryBuilder);// 按 user_time 升序排序
-        searchSourceBuilder.sort("birthday", SortOrder.ASC);// 设置返回数量
-        searchSourceBuilder.size(1000);
+        searchSourceBuilder.query(queryBuilder);
+        searchSourceBuilder.sort("birthday", SortOrder.ASC);
+        searchSourceBuilder.from(0);
+        searchSourceBuilder.size(100);
+        searchSourceBuilder.timeout(new TimeValue(10, TimeUnit.SECONDS));
 
         HighlightBuilder highlightBuilder = new HighlightBuilder();
         highlightBuilder.field(new HighlightBuilder.Field("name"));
@@ -108,8 +120,9 @@ public class StudentServiceImpl implements StudentService {
         SearchResponse searchResponse = null;
         try {
             searchResponse = esUtils.searchBySearchSourceBuilde("student_index", searchSourceBuilder);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.error("es search error", e);
+            throw new RuntimeException(e.getMessage());
         }
         SearchHit[] hitsArr = searchResponse.getHits().getHits();
         log.info("es search took: {}", searchResponse.getTook());

@@ -43,9 +43,15 @@ public class TestController {
         return "success";
     }
 
+    @RequestMapping("createIndex")
+    public String createIndex(String index) {
+        studentService.createIndex(index);
+        return "success";
+    }
+
     @RequestMapping("deleteIndex")
-    public String deleteIndex() {
-        studentService.deleteIndex();
+    public String deleteIndex(String index) {
+        studentService.deleteIndex(index);
         return "success";
     }
 

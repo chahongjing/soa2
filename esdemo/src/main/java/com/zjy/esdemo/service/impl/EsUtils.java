@@ -8,6 +8,9 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.stereotype.Component;
@@ -39,6 +42,48 @@ public class EsUtils {
          SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
          return searchResponse;
     }
+
+    public boolean createIndex(String index) throws IOException {
+        CreateIndexRequest cir = new CreateIndexRequest(index);
+        XContentBuilder builder = XContentFactory.jsonBuilder();
+        builder.startObject(); {
+            builder.startObject("properties"); {
+                builder.startObject("studentId"); {
+                    builder.field("type", "long");
+                }
+                builder.endObject();
+                builder.startObject("name"); {
+                    builder.field("type", "text");
+//                            .field("analyzer", "ik_smart")
+//                            .field("search_analyzer", "ik_max_word");
+                }
+                builder.endObject();
+                builder.startObject("age"); {
+                    builder.field("type", "integer");
+//                            field("analyzer", "ik_smart").
+//                            field("search_analyzer", "ik_max_word");
+                }
+                builder.endObject();
+                builder.startObject("scores"); {
+                    builder.field("type", "text");
+//                            field("analyzer", "ik_smart").
+//                            field("search_analyzer", "ik_max_word");
+                }
+                builder.endObject();
+                builder.startObject("birthday"); {
+                    builder.field("type", "long");
+//                            field("analyzer", "ik_smart").
+//                            field("search_analyzer", "ik_max_word");
+                }
+                builder.endObject();
+            }
+            builder.endObject();
+        }
+        builder.endObject();
+        cir.mapping(builder);
+        return restHighLevelClient.indices().create(cir, RequestOptions.DEFAULT).isAcknowledged();
+    }
+
 
     public boolean deleteIndex(String index) throws IOException {
         DeleteIndexRequest dir = new DeleteIndexRequest(index);

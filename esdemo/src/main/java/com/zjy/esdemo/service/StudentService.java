@@ -15,7 +15,9 @@ public interface StudentService {
 
     void deleteAll();
 
-    void deleteIndex();
+    void createIndex(String index);
+
+    void deleteIndex(String index);
 
     List<Student> search();
 }
