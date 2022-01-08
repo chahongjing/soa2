@@ -5,9 +5,10 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import java.util.Date;
 import java.util.List;
 
-@Document(indexName = "student_index", type = "student")
+@Document(indexName = "student_index")
 public class Student {
     @Id
     @Field(type = FieldType.Long)
@@ -22,15 +23,19 @@ public class Student {
     @Field(type = FieldType.Auto)
     private List<Double> scores;
 
+    @Field(type = FieldType.Long)
+    private Date birthday;
+
     public Student() {
 
     }
 
-    public Student(Long studentId, String name, Integer age, List<Double> scores) {
+    public Student(Long studentId, String name, Integer age, List<Double> scores, Date birthday) {
         this.studentId = studentId;
         this.name = name;
         this.age = age;
         this.scores = scores;
+        this.birthday = birthday;
     }
 
     public Long getStudentId() {
@@ -63,6 +68,14 @@ public class Student {
 
     public void setScores(List<Double> scores) {
         this.scores = scores;
+    }
+
+    public Date getBirthday() {
+        return this.birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 
     @Override

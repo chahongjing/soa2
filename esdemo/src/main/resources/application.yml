@@ -1,9 +1,19 @@
 spring:
-#  elasticsearch:
-#    rest:
-#      uris: 127.0.0.1:9200
   data:
     elasticsearch:
-      cluster-name: elasticsearch
-      cluster-nodes: 127.0.0.1:9300
-##      cluster-nodes: hadoop137:9300,hadoop138:9300,hadoop139:9300
+      client:
+        reactive:
+          endpoints:
+            - 127.0.0.1:9300
+          use-ssl: false
+#          username:
+#          password:
+# 非starter配置
+es:
+  protocol: http
+  host: 127.0.0.1
+  port: 9200
+  username:
+  password:
+server:
+  port: 8098

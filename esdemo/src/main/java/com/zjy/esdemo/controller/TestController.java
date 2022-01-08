@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/testes")
+@RequestMapping("/test")
 public class TestController {
     @Autowired
     StudentService studentService;
@@ -32,7 +32,25 @@ public class TestController {
     }
 
     @RequestMapping("save")
-    public void save(Student bean) {
+    public String save(Student bean) {
         studentService.save(bean);
+        return "success";
+    }
+
+    @RequestMapping("deleteAll")
+    public String deleteAll() {
+        studentService.deleteAll();
+        return "success";
+    }
+
+    @RequestMapping("deleteIndex")
+    public String deleteIndex() {
+        studentService.deleteIndex();
+        return "success";
+    }
+
+    @RequestMapping("search")
+    public List<Student> search() {
+        return studentService.search();
     }
 }

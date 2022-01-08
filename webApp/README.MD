@@ -32,8 +32,10 @@ output {
 ``` yml
 network.host: 127.0.0.1
 http.port: 9200
+xpack.ml.enabled: false
 ```
 2. 启动es：`/usr/share/elasticsearch/bin/elasticsearch`。然后访问服务：[es](http://127.0.0.1:9200)
+3. [索引查询](http://127.0.0.1:9200/student_index/_search?q=思想&pretty=true) 其中student_index为索引名称，q为搜索关键字，pretty为格式化输出，默认为json
 ### kibana
 1. 启动kibana:`/usr/share/kibana/bin/kibana`。然后访问服务：[kibana](http://127.0.0.1:5601)
 

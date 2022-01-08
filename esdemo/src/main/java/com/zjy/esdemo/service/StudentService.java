@@ -12,4 +12,10 @@ public interface StudentService {
     void saveTest();
 
     void save(Student bean);
+
+    void deleteAll();
+
+    void deleteIndex();
+
+    List<Student> search();
 }
