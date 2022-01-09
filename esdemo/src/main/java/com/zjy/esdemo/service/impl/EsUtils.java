@@ -28,21 +28,28 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.cluster.metadata.AliasMetadata;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
@@ -348,6 +355,61 @@ public class EsUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 嵌套查询，高亮
+     * @return
+     */
+    public List<Student> mulitSearch() {
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+
+        QueryBuilder queryBuilder = QueryBuilders.boolQuery()
+                .must(QueryBuilders.termQuery("name", "王"))
+                .must(QueryBuilders.rangeQuery("birthday").gte(new Date(2022 - 1900, 1 - 1, 4, 8, 24, 45).getTime()))
+                .must(QueryBuilders.rangeQuery("birthday").lte(new Date(2022 - 1900, 1 - 1, 5, 19, 54, 32).getTime()));
+        searchSourceBuilder.query(queryBuilder);
+
+        // 嵌套查询，其中key为address.area，term为精准查询，需要设置为keyword类型，同时查询key也要添加 .keyword
+//        QueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().
+//                must(QueryBuilders.termQuery("address.area.keyword","南漳县"));
+//        searchSourceBuilder.query(boolQueryBuilder);
+
+        searchSourceBuilder.sort("birthday", SortOrder.ASC);
+        searchSourceBuilder.from(0);
+        searchSourceBuilder.size(100);
+        searchSourceBuilder.timeout(new TimeValue(10, TimeUnit.SECONDS));
+
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        highlightBuilder.field(new HighlightBuilder.Field("name"));
+        highlightBuilder.requireFieldMatch(false);
+        highlightBuilder.preTags("<font color='red'>");
+        highlightBuilder.postTags("</font>");
+        highlightBuilder.fragmentSize(100);
+        highlightBuilder.numOfFragments(0);
+        searchSourceBuilder.highlighter(highlightBuilder);
+
+        SearchResponse searchResponse = null;
+        try {
+            searchResponse = searchBySearchSourceBuilde("student_index", searchSourceBuilder);
+        } catch (Exception e) {
+            log.error("es search error", e);
+            throw new RuntimeException(e.getMessage());
+        }
+        SearchHit[] hitsArr = searchResponse.getHits().getHits();
+        log.info("es search took: {}", searchResponse.getTook());
+        List<Student> studentList = new ArrayList<>();
+        for (SearchHit hit : hitsArr) {
+            Student student = JSONObject.parseObject(hit.getSourceAsString(), Student.class);
+            if(!CollectionUtils.isEmpty(hit.getHighlightFields())) {
+                HighlightField highlightField = hit.getHighlightFields().get("name");
+                if(highlightField != null) {
+                    student.setName(Arrays.stream(highlightField.getFragments()).map(Text::toString).collect(Collectors.joining("")));
+                }
+            }
+            studentList.add(student);
+        }
+        return studentList;
     }
     // endregion
 

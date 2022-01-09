@@ -157,53 +157,6 @@ public class StudentServiceImpl implements StudentService {
 
     //查询
     public List<Student> search() {
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-
-        QueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("name", "王"))
-                .must(QueryBuilders.rangeQuery("birthday").gte(new Date(2022 - 1900, 1 - 1, 4, 8, 24, 45).getTime()))
-                .must(QueryBuilders.rangeQuery("birthday").lte(new Date(2022 - 1900, 1 - 1, 5, 19, 54, 32).getTime()));
-        searchSourceBuilder.query(queryBuilder);
-
-        // 嵌套查询，其中key为address.area，term为精准查询，需要设置为keyword类型，同时查询key也要添加 .keyword
-//        QueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().
-//                must(QueryBuilders.termQuery("address.area.keyword","南漳县"));
-//        searchSourceBuilder.query(boolQueryBuilder);
-
-        searchSourceBuilder.sort("birthday", SortOrder.ASC);
-        searchSourceBuilder.from(0);
-        searchSourceBuilder.size(100);
-        searchSourceBuilder.timeout(new TimeValue(10, TimeUnit.SECONDS));
-
-        HighlightBuilder highlightBuilder = new HighlightBuilder();
-        highlightBuilder.field(new HighlightBuilder.Field("name"));
-        highlightBuilder.requireFieldMatch(false);
-        highlightBuilder.preTags("<font color='red'>");
-        highlightBuilder.postTags("</font>");
-        highlightBuilder.fragmentSize(100);
-        highlightBuilder.numOfFragments(0);
-        searchSourceBuilder.highlighter(highlightBuilder);
-
-        SearchResponse searchResponse = null;
-        try {
-            searchResponse = esUtils.searchBySearchSourceBuilde("student_index", searchSourceBuilder);
-        } catch (Exception e) {
-            log.error("es search error", e);
-            throw new RuntimeException(e.getMessage());
-        }
-        SearchHit[] hitsArr = searchResponse.getHits().getHits();
-        log.info("es search took: {}", searchResponse.getTook());
-        List<Student> studentList = new ArrayList<>();
-        for (SearchHit hit : hitsArr) {
-            Student student = JSONObject.parseObject(hit.getSourceAsString(), Student.class);
-            if(!CollectionUtils.isEmpty(hit.getHighlightFields())) {
-                HighlightField highlightField = hit.getHighlightFields().get("name");
-                if(highlightField != null) {
-                    student.setName(Arrays.stream(highlightField.getFragments()).map(Text::toString).collect(Collectors.joining("")));
-                }
-            }
-            studentList.add(student);
-        }
-        return studentList;
+        return esUtils.mulitSearch();
     }
 }
