@@ -2,14 +2,17 @@ package com.zjy.esdemo.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zjy.esdemo.dao.StudentDao;
+import com.zjy.esdemo.po.Address;
 import com.zjy.esdemo.po.Student;
 import com.zjy.esdemo.service.StudentService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -58,12 +61,30 @@ public class StudentServiceImpl implements StudentService {
         scores.add(67.2);
         scores.add(27.2);
         scores.add(56.2);
+        Address address = new Address();
+        address.setProvince("湖北省");
+        address.setCity("武汉市");
+        address.setArea("高新区");
 
-        studentDao.save(new Student(1L, "刘伯", 21, scores, new Date(2022 - 1900, Calendar.JANUARY, 2, 3, 4, 5)));
-        studentDao.save(new Student(2L, "刘思想", 35, scores, new Date(2022 - 1900, Calendar.JANUARY, 3, 7, 5, 35)));
-        studentDao.save(new Student(3L, "王皮皮", 45, scores, new Date(2022 - 1900, Calendar.JANUARY, 4, 8, 24, 45)));
-        studentDao.save(new Student(4L, "王二丫", 23, scores, new Date(2022 - 1900, Calendar.JANUARY, 5, 19, 54, 32)));
-        studentDao.save(new Student(5L, "王铁蛋", 51, scores, new Date(2022 - 1900, Calendar.JANUARY, 6, 12, 33, 18)));
+        Student student = new Student(1L, "刘伯", 21, scores, new Date(2022 - 1900, Calendar.JANUARY, 2, 3, 4, 5));
+        student.setAddress(address);
+        studentDao.save(student);
+
+        student = new Student(2L, "刘思想", 35, scores, new Date(2022 - 1900, Calendar.JANUARY, 3, 7, 5, 35));
+        student.setAddress(address);
+        studentDao.save(student);
+
+        student = new Student(3L, "王皮皮", 45, scores, new Date(2022 - 1900, Calendar.JANUARY, 4, 8, 24, 45));
+        student.setAddress(address);
+        studentDao.save(student);
+
+        student = new Student(4L, "王二丫", 23, scores, new Date(2022 - 1900, Calendar.JANUARY, 5, 19, 54, 32));
+        student.setAddress(address);
+        studentDao.save(student);
+
+        student = new Student(5L, "王铁蛋", 51, scores, new Date(2022 - 1900, Calendar.JANUARY, 6, 12, 33, 18));
+        student.setAddress(address);
+        studentDao.save(student);
     }
 
     @Override
@@ -102,6 +123,12 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public void insertDoc(String index) {
         Student student = new Student(6L, "黄金", 65, new ArrayList<>(), new Date(2022 - 1900, Calendar.FEBRUARY, 5, 23, 52, 18));
+
+        Address address = new Address();
+        address.setProvince("北京市");
+        address.setCity("北京市");
+        address.setArea("海淀区");
+        student.setAddress(address);
         esUtils.insertDoc(index, student.getStudentId().toString(), student);
     }
 
@@ -113,24 +140,36 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public void batchInsertDoc(String index) {
         List<Student> list = new ArrayList<>();
+        Address address = new Address();
+        address.setProvince("湖北省");
+        address.setCity("襄阳市");
+        address.setArea("南漳县");
         Student student = new Student(7L, "黄金", 65, new ArrayList<>(), new Date(2022 - 1900, Calendar.APRIL, 5, 23, 52, 18));
-        student.setBirthday(null);
+        student.setAddress(address);
         list.add(student);
         student = new Student(8L, "白银", 34, new ArrayList<>(), new Date(2022 - 1900, Calendar.APRIL, 27, 6, 29, 41));
-        student.setBirthday(null);
+        student.setAddress(address);
         list.add(student);
         esUtils.bulkInsert(index, list);
+//        esUtils.bulkIndex(index, list);
     }
 
 
     //查询
     public List<Student> search() {
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+
         QueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery("name", "王"))
                 .must(QueryBuilders.rangeQuery("birthday").gte(new Date(2022 - 1900, 1 - 1, 4, 8, 24, 45).getTime()))
                 .must(QueryBuilders.rangeQuery("birthday").lte(new Date(2022 - 1900, 1 - 1, 5, 19, 54, 32).getTime()));
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(queryBuilder);
+
+        // 嵌套查询，其中key为address.area，term为精准查询，需要设置为keyword类型，同时查询key也要添加 .keyword
+//        QueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().
+//                must(QueryBuilders.termQuery("address.area.keyword","南漳县"));
+//        searchSourceBuilder.query(boolQueryBuilder);
+
         searchSourceBuilder.sort("birthday", SortOrder.ASC);
         searchSourceBuilder.from(0);
         searchSourceBuilder.size(100);
@@ -156,20 +195,13 @@ public class StudentServiceImpl implements StudentService {
         log.info("es search took: {}", searchResponse.getTook());
         List<Student> studentList = new ArrayList<>();
         for (SearchHit hit : hitsArr) {
-            Student student = new Student();
-            JSONObject source = JSONObject.parseObject(hit.getSourceAsString());
+            Student student = JSONObject.parseObject(hit.getSourceAsString(), Student.class);
             if(!CollectionUtils.isEmpty(hit.getHighlightFields())) {
                 HighlightField highlightField = hit.getHighlightFields().get("name");
                 if(highlightField != null) {
                     student.setName(Arrays.stream(highlightField.getFragments()).map(Text::toString).collect(Collectors.joining("")));
-                } else {
-                    student.setName(source.getString("name"));
                 }
-            } else {
-                student.setName(source.getString("name"));
             }
-            long birthday = Long.parseLong(source.getString("birthday"));
-            student.setBirthday(new Date(birthday));
             studentList.add(student);
         }
         return studentList;

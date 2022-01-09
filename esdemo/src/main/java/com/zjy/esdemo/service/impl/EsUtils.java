@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.zjy.esdemo.po.Student;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.indices.alias.Alias;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -34,6 +35,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.stereotype.Component;
@@ -74,7 +76,7 @@ public class EsUtils {
                 }
                 builder.endObject();
                 builder.startObject("name"); {
-                    builder.field("type", "text");
+                    builder.field("type", "keyworkd");
 //                            .field("analyzer", "ik_smart")
 //                            .field("search_analyzer", "ik_max_word");
                 }
@@ -95,6 +97,22 @@ public class EsUtils {
                     builder.field("type", "long");
 //                            field("analyzer", "ik_smart").
 //                            field("search_analyzer", "ik_max_word");
+                }
+                builder.endObject();
+                builder.startObject("address"); {
+                    builder.field("type", "nested");
+                    builder.startObject("province"); {
+                        builder.field("type", "keyword");
+                    }
+                    builder.endObject();
+                    builder.startObject("city"); {
+                        builder.field("type", "keyword");
+                    }
+                    builder.endObject();
+                    builder.startObject("area"); {
+                        builder.field("type", "keyword");
+                    }
+                    builder.endObject();
                 }
                 builder.endObject();
             }
@@ -135,6 +153,7 @@ public class EsUtils {
          SearchRequest searchRequest = new SearchRequest(index);
          searchRequest.source(searchSourceBuilder);
         // 同步获取SearchResponse结果
+        log.info("es search param: {}", searchRequest.source().toString());
          SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
          return searchResponse;
     }
@@ -144,7 +163,7 @@ public class EsUtils {
             IndexRequest ir = new IndexRequest(index);
             ir.id(id).source(XContentFactory.jsonBuilder().value(objectToJSONObject(student)));
             IndexResponse indexResponse = restHighLevelClient.index(ir, RequestOptions.DEFAULT);
-            if (indexResponse.getResult().toString().equals("UPDATED") || indexResponse.getResult().toString().equals("NOOP")) {
+            if (indexResponse.getResult() == DocWriteResponse.Result.UPDATED || indexResponse.getResult() == DocWriteResponse.Result.NOOP) {
                 return true;
             }
         } catch (Exception e) {
@@ -178,7 +197,7 @@ public class EsUtils {
                     endObject();
             UpdateRequest updateRequest = new UpdateRequest(index, id).doc(content);
             UpdateResponse updateResponse = restHighLevelClient.update(updateRequest, RequestOptions.DEFAULT);
-            if (updateResponse.getResult().toString().equals("UPDATED") || updateResponse.getResult().toString().equals("NOOP")) {
+            if (updateResponse.getResult() == DocWriteResponse.Result.UPDATED || updateResponse.getResult() == DocWriteResponse.Result.NOOP) {
                 return true;
             }
         } catch (Exception e) {
@@ -193,7 +212,7 @@ public class EsUtils {
         try {
             DeleteRequest deleteRequest = new DeleteRequest(index, id);
             DeleteResponse deleteResponse = restHighLevelClient.delete(deleteRequest, RequestOptions.DEFAULT);
-            if (deleteResponse.getResult().toString().equals("DELETED")) {
+            if (deleteResponse.getResult() == DocWriteResponse.Result.DELETED) {
                 return true;
             }
         } catch (Exception e) {
@@ -216,6 +235,7 @@ public class EsUtils {
         for (Student student : list) {
             IndexRequest indexRequest = new IndexRequest(index);
             indexRequest.id(student.getStudentId().toString()).source(XContentFactory.jsonBuilder().value(objectToJSONObject(student)));
+//            indexRequest.id(String.valueOf(bulk.getId())).source(bulk.toString(), XContentType.JSON);
             bulkRequest.add(indexRequest); // 加入到批量请求bulk
         }
         } catch (IOException e) {
@@ -248,8 +268,7 @@ public class EsUtils {
         }
     }
 
-
-    public List<Student> getMemberList(String index, List<String> memberIds) {
+    public List<Student> getList(String index, List<String> memberIds) {
         List<Student> memberList = new ArrayList<>();
 
         MultiSearchRequest request = new MultiSearchRequest();
@@ -292,23 +311,7 @@ public class EsUtils {
         return result;
     }
 
-    //    public BulkResponse bulkIndex(String indexName, List<Bulk> bulks) {
-//        try{
-//            BulkRequest bulkRequest = new BulkRequest();
-//            IndexRequest request = null;
-//            for(Bulk bulk: bulks) {
-//                request = new IndexRequest(indexName);
-//                request.id(String.valueOf(bulk.getId())).source(bulk.toString(), XContentType.JSON);
-//                bulkRequest.add(request);
-//            }
-//            BulkResponse response = restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
-//            return response;
-//        }catch (Exception e){
-//            log.error("批量插入索引失败:{}", e);
-//        }
-//        return null;
-//    }
-
+    // 批量处理
     public BulkProcessor init() {
         BulkProcessor.Listener listener = new BulkProcessor.Listener() {
             @Override
@@ -327,20 +330,25 @@ public class EsUtils {
         return BulkProcessor.builder((request, bulkListener) ->
                 restHighLevelClient.bulkAsync(request, RequestOptions.DEFAULT, bulkListener), listener)
                 .setBulkActions(10000)
-                .setBulkSize(new ByteSizeValue(10, ByteSizeUnit.MB))
+                .setBulkSize(new ByteSizeValue(5, ByteSizeUnit.MB))
                 .setFlushInterval(TimeValue.timeValueSeconds(5))
                 .setConcurrentRequests(2)
                 .build();
     }
-//    public void bulkIndex(String indexName, List<Bulk> bulks) {
-//        BulkProcessor bulkProcessor = init();
-//        IndexRequest request = null;
-//        for(Bulk bulk: bulks) {
-//            request = new IndexRequest(indexName);
-//            request.id(String.valueOf(bulk.getId())).source(bulk.toElasticString(), XContentType.JSON);
-//            bulkProcessor.add(request);
-//        }
-//    }
+
+    public void bulkIndex(String indexName, List<Student> studentList) {
+        BulkProcessor bulkProcessor = init();
+        IndexRequest request;
+        try {
+            for(Student student: studentList) {
+                request = new IndexRequest(indexName);
+                request.id(student.getStudentId().toString()).source(XContentFactory.jsonBuilder().value(objectToJSONObject(student)));
+                bulkProcessor.add(request);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     // endregion
 
     private JSONObject objectToJSONObject(Student student) {

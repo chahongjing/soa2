@@ -95,6 +95,6 @@ public class TestController {
         ids.add("2");
         ids.add("6");
         ids.add("8");
-        return esUtils.getMemberList("student_index", ids);
+        return esUtils.getList("student_index", ids);
     }
 }

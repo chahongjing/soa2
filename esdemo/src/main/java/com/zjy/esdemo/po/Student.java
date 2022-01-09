@@ -14,7 +14,7 @@ public class Student {
     @Field(type = FieldType.Long)
     private Long studentId;
 
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Keyword)
     private String name;
 
     @Field(type = FieldType.Integer)
@@ -25,6 +25,9 @@ public class Student {
 
     @Field(type = FieldType.Long)
     private Date birthday;
+
+    @Field(type = FieldType.Nested)
+    private Address address;
 
     public Student() {
 
@@ -76,6 +79,14 @@ public class Student {
 
     public void setBirthday(Date birthday) {
         this.birthday = birthday;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
     @Override
