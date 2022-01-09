@@ -3,10 +3,12 @@ package com.zjy.esdemo.controller;
 import com.alibaba.fastjson.JSON;
 import com.zjy.esdemo.po.Student;
 import com.zjy.esdemo.service.StudentService;
+import com.zjy.esdemo.service.impl.EsUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -14,6 +16,9 @@ import java.util.List;
 public class TestController {
     @Autowired
     StudentService studentService;
+
+    @Autowired
+    EsUtils esUtils;
 
     @RequestMapping("findAll")
     public String findAll() {
@@ -82,5 +87,14 @@ public class TestController {
     public String deleteIndex(String index) {
         studentService.deleteIndex(index);
         return "success";
+    }
+
+    @RequestMapping("es")
+    public Object es() {
+        List<String> ids = new ArrayList<>();
+        ids.add("2");
+        ids.add("6");
+        ids.add("8");
+        return esUtils.getMemberList("student_index", ids);
     }
 }

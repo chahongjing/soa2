@@ -14,7 +14,7 @@
 |mybatis-plus-starter|[【git docs】](https://gitee.com/baomidou/mybatisplus-spring-boot)|||
 |dubbo-admin|||
 |[multidatasource 8080](http://localhost:8080)| |多数据源配置，打war包|
-|esdemo| |es demo 使用6.2.2版本的es，注意，要和starter里的版本保持一致|
+|esdemo| |es demo 使用7.12.1版本的es，注意，要和starter里的版本保持一致|
 |webApp|[生产日志](http://127.0.0.1:8086/index) [logstash](http://127.0.0.1:9600) [es](http://127.0.0.1:9200) [kibana](http://127.0.0.1:5601)|elk demo|
 ### 多环境配置
 1. maven打包时可以指定参数，如-P test,则为指定打test环境配置。

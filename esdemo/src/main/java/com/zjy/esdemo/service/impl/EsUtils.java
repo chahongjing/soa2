@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.zjy.esdemo.po.Student;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.admin.indices.alias.Alias;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -40,6 +41,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
@@ -55,6 +57,7 @@ public class EsUtils {
     // region index
     public boolean createIndex(String index) throws IOException {
         CreateIndexRequest cir = new CreateIndexRequest(index);
+        cir.alias(new Alias("学生信息索引"));
 
         //设置分片
 //        cir.settings(Settings.builder().
@@ -252,7 +255,7 @@ public class EsUtils {
         MultiSearchRequest request = new MultiSearchRequest();
         memberIds.forEach(memberId -> {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().
-                    query(QueryBuilders.matchPhraseQuery("memberId", memberId));
+                    query(QueryBuilders.matchPhraseQuery("studentId", memberId));
             request.add(new SearchRequest()
                     .source(searchSourceBuilder)
                     .indices(index));
@@ -270,18 +273,23 @@ public class EsUtils {
         return memberList;
     }
 
-    public Set<String> getAlias() {
-        Set<String> indices = new HashSet<>();
+    /**
+     * 获取所有索引别名
+     * @return
+     */
+    public Map<String, String> getAlias() {
         GetAliasesRequest request = new GetAliasesRequest();
+        Map<String, String> result = new HashMap<>();
         try {
             GetAliasesResponse getAliasesResponse = restHighLevelClient.indices().getAlias(request, RequestOptions.DEFAULT);
             Map<String, Set<AliasMetadata>> map = getAliasesResponse.getAliases();
-            indices = map.keySet();
-//            indices.removeIf(str -> str.startsWith(StringPool.DOT));
+            map.entrySet().forEach(item -> {
+                result.put(item.getKey(), item.getValue().stream().map(AliasMetadata::getAlias).collect(Collectors.joining(",")));
+            });
         } catch (IOException e) {
             log.error("es get indices failed", e);
         }
-        return indices;
+        return result;
     }
 
     //    public BulkResponse bulkIndex(String indexName, List<Bulk> bulks) {
