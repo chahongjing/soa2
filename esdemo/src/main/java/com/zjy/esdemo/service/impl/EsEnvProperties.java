@@ -64,7 +64,7 @@ public class EsEnvProperties {
 //    @Bean
     public RestHighLevelClient restHighLevelClient2() {
         List<Header> defaultHeaders = new ArrayList<>();
-        defaultHeaders.add(new BasicHeader("Authorization", "Basic eGlhb21pOnhpYW9taQ=="));
+        defaultHeaders.add(new BasicHeader("Authorization", "Basic abcdefefsfasdfafef=="));
         return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, protocol)).
                 setHttpClientConfigCallback((HttpAsyncClientBuilder httpAsyncClientBuilder) ->
                         httpAsyncClientBuilder.setDefaultHeaders(defaultHeaders)));
