@@ -39,7 +39,7 @@ public class EsEnvProperties {
      */
     @Bean("restHighLevelClientPre")
     public RestHighLevelClient getRestHighLevelClient() {
-//        Header[] defaultHeaders = new Header[]{new BasicHeader("Authorization", "Basic eGlhb21pOnhpYW9taQ==")};
+//        Header[] defaultHeaders = new Header[]{new BasicHeader("Authorization", "Basic abcdefefsfasdfafef==")};
 //        return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, protocol)).setDefaultHeaders(defaultHeaders));
         return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, protocol)));
     }
