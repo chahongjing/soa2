@@ -2,9 +2,12 @@ package com.zjy.esdemo.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONReader;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.zjy.esdemo.po.Student;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.util.EntityUtils;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.indices.alias.Alias;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
@@ -23,7 +26,10 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.GetAliasesResponse;
+import org.elasticsearch.client.Request;
 import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
@@ -47,7 +53,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -62,6 +73,8 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 public class EsUtils {
     @Resource(name = "restHighLevelClientPre")
     private RestHighLevelClient restHighLevelClient;
+    @Resource
+    private RestClient restClient;
 
     // region index
     public boolean createIndex(String index) throws IOException {
@@ -411,6 +424,42 @@ public class EsUtils {
         }
         return studentList;
     }
+
+    /**
+     * restclient查询es
+     */
+    public void test() {
+        Request request = new Request("GET", "/student_index/_search");
+        String jsonPath = "request.json";
+        JSONReader reader = getJsonReader(jsonPath);
+        request.setJsonEntity(reader.readString());
+        try {
+            Response response = restClient.performRequest(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode < 200 || 300 <= statusCode) {
+                log.error("HTTP status code {}", response.getStatusLine().getStatusCode());
+                throw new RuntimeException("HTTP status code is not 200");
+            }
+            String respBodyStr = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            JSONObject jsonObject = JSON.parseObject(respBodyStr);
+        } catch (IOException e) {
+            log.error("restclient request error!", e);
+        }
+    }
+
+    private JSONReader getJsonReader(String srcPath) {
+        JSONReader jsonReader = null;
+        try {
+            String resource = this.getClass().getClassLoader().getResource("").toString();
+            if(resource.startsWith("file:/")) {
+                resource = resource.substring(6);
+            }
+            FileReader fileReader=new FileReader(resource + srcPath);
+            jsonReader = new JSONReader(fileReader);
+        } catch (Exception e) {
+            log.error("loadTestData: 读取失败");
+        }
+        return jsonReader;}
     // endregion
 
     private JSONObject objectToJSONObject(Student student) {
@@ -422,5 +471,9 @@ public class EsUtils {
         });
         jsonObject.put("_class", student.getClass().getTypeName());
         return jsonObject;
+    }
+
+    public static void main(String[] a) {
+        new EsUtils().test();
     }
 }
