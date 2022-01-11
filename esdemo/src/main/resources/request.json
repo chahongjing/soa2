@@ -11,6 +11,29 @@
           "match": {
             "assignSsoId": "C2E6AB0352F74C63879B1194C4036141"
           }
+        },
+        {
+          "nested": {
+            "path": "records",
+            "query": {
+              "bool": {
+                "must": [
+                  {
+                    "match": {
+                      "records.operateSsoId": "zjy"
+                    }
+                  }
+                ],
+                "must_not": [
+                  {
+                    "match": {
+                      "records.operateType": "REMINDER"
+                    }
+                  }
+                ]
+              }
+            }
+          }
         }
       ],
       "must_not": [
