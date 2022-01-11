@@ -1,0 +1,36 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "workOrderId": "WOCN20211106003316"
+          }
+        },
+        {
+          "nested": {
+            "path": "records",
+            "query": {
+              "bool": {
+                "must": [
+                  {
+                    "match": {
+                      "records.operateSsoId": "258772EE154A4E31BC0126BA871E3EDB"
+                    }
+                  }
+                ],
+                "must_not": [
+                  {
+                    "match": {
+                      "records.operateType": "REMINDER"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
