@@ -1,0 +1,10 @@
+{
+  "query": {
+    "nested": {
+      "path": "extra",
+      "query": {
+        "match": {"extra.workOrderId":"WOCN20211205002958"}
+      }
+    }
+  }
+}

@@ -35,50 +35,55 @@ public class EsEnvProperties {
     @Value("${es.password}")
     private String password;
 
+    /**
+     * 不带密码验证
+     * @return
+     */
     @Bean
-    public RestClientBuilder restClientBuilder() {
+    public RestClientBuilder restClientBuilderWithNoAuth() {
         return RestClient.builder(new HttpHost(host, port, protocol));
     }
 
+    /**
+     * header带密码验证
+     * @return
+     */
+//    @Bean
+    public RestClientBuilder restClientBuilderWithHeaderAuth() {
+        List<Header> defaultHeaders = new ArrayList<>();
+        defaultHeaders.add(new BasicHeader("Authorization", "Basic abcdefefsfasdfafef=="));
+        return RestClient.builder(new HttpHost(host, port, protocol)).
+                setHttpClientConfigCallback((HttpAsyncClientBuilder builder) -> builder.setDefaultHeaders(defaultHeaders));
+    }
+
+    /**
+     * 带密码验证
+     * @return
+     */
+//    @Bean
+    public RestClientBuilder restClientBuilderWithPasswordAuth() {
+        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
+        return RestClient.builder(new HttpHost(host, port, protocol)).
+                setHttpClientConfigCallback((HttpAsyncClientBuilder builder) -> builder.setDefaultCredentialsProvider(credentialsProvider));
+    }
+
+    /**
+     * restClient
+     * @param restClientBuilder
+     * @return
+     */
     @Bean
     public RestClient restClient(@Autowired RestClientBuilder restClientBuilder) {
         return restClientBuilder.build();
     }
 
     /**
-     * 不带密码验证
+     * restHighLevelClientPre
      * @return
      */
     @Bean("restHighLevelClientPre")
     public RestHighLevelClient getRestHighLevelClient(@Autowired RestClientBuilder restClientBuilder) {
-//        Header[] defaultHeaders = new Header[]{new BasicHeader("Authorization", "Basic abcdefefsfasdfafef==")};
-//        return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, protocol)).setDefaultHeaders(defaultHeaders));
         return new RestHighLevelClient(restClientBuilder);
-    }
-
-    /**
-     * 带密码验证
-     * @return
-     */
-//    @Bean
-    public RestHighLevelClient restHighLevelClient(@Autowired RestClientBuilder restClientBuilder) {
-        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
-        return new RestHighLevelClient(restClientBuilder.
-                setHttpClientConfigCallback((HttpAsyncClientBuilder httpAsyncClientBuilder) ->
-                        httpAsyncClientBuilder.setDefaultCredentialsProvider(credentialsProvider)));
-    }
-
-    /**
-     * 带密码验证
-     * @return
-     */
-//    @Bean
-    public RestHighLevelClient restHighLevelClient2(@Autowired RestClientBuilder restClientBuilder) {
-        List<Header> defaultHeaders = new ArrayList<>();
-        defaultHeaders.add(new BasicHeader("Authorization", "Basic abcdefefsfasdfafef=="));
-        return new RestHighLevelClient(restClientBuilder.
-                setHttpClientConfigCallback((HttpAsyncClientBuilder httpAsyncClientBuilder) ->
-                        httpAsyncClientBuilder.setDefaultHeaders(defaultHeaders)));
     }
 }
