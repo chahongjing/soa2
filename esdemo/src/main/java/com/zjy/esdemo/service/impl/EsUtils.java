@@ -8,6 +8,7 @@ import com.zjy.esdemo.po.Student;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.util.EntityUtils;
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.indices.alias.Alias;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
@@ -41,6 +42,7 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
@@ -96,7 +98,7 @@ public class EsUtils {
                 }
                 builder.endObject();
                 builder.startObject("name"); {
-                    builder.field("type", "keyworkd");
+                    builder.field("type", "text");
 //                            .field("analyzer", "ik_smart")
 //                            .field("search_analyzer", "ik_max_word");
                 }
@@ -120,17 +122,43 @@ public class EsUtils {
                 }
                 builder.endObject();
                 builder.startObject("address"); {
+                    builder.field("type", "object");
+
+                    builder.startObject("properties");
+                    {
+                        builder.startObject("province");
+                        {
+                            builder.field("type", "text");
+                        }
+                        builder.endObject();
+                        builder.startObject("city");
+                        {
+                            builder.field("type", "text");
+                        }
+                        builder.endObject();
+                        builder.startObject("area");
+                        {
+                            builder.field("type", "keyword");
+                        }
+                        builder.endObject();
+                    }
+                    builder.endObject();
+                }
+                builder.endObject();
+                builder.startObject("interests"); {
                     builder.field("type", "nested");
-                    builder.startObject("province"); {
-                        builder.field("type", "keyword");
-                    }
-                    builder.endObject();
-                    builder.startObject("city"); {
-                        builder.field("type", "keyword");
-                    }
-                    builder.endObject();
-                    builder.startObject("area"); {
-                        builder.field("type", "keyword");
+                    builder.startObject("properties");
+                    {
+                        builder.startObject("code");
+                        {
+                            builder.field("type", "text");
+                        }
+                        builder.endObject();
+                        builder.startObject("name");
+                        {
+                            builder.field("type", "text");
+                        }
+                        builder.endObject();
                     }
                     builder.endObject();
                 }
@@ -140,6 +168,7 @@ public class EsUtils {
         }
         builder.endObject();
         cir.mapping(builder);
+        log.info("mapping:{}", JSON.toJSONString(builder));
         return restHighLevelClient.indices().create(cir, RequestOptions.DEFAULT).isAcknowledged();
     }
 
@@ -377,16 +406,37 @@ public class EsUtils {
     public List<Student> mulitSearch() {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-        QueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("name", "王"))
-                .must(QueryBuilders.rangeQuery("birthday").gte(new Date(2022 - 1900, 1 - 1, 4, 8, 24, 45).getTime()))
-                .must(QueryBuilders.rangeQuery("birthday").lte(new Date(2022 - 1900, 1 - 1, 5, 19, 54, 32).getTime()));
-        searchSourceBuilder.query(queryBuilder);
+//        QueryBuilder queryBuilder = QueryBuilders.boolQuery()
+//                .must(QueryBuilders.termQuery("name", "王"))
+//                .must(QueryBuilders.rangeQuery("birthday").gte(new Date(2022 - 1900, 1 - 1, 4, 8, 24, 45).getTime()))
+//                .must(QueryBuilders.rangeQuery("birthday").lte(new Date(2022 - 1900, 1 - 1, 5, 19, 54, 32).getTime()));
+//        searchSourceBuilder.query(queryBuilder);
 
-        // 嵌套查询，其中key为address.area，term为精准查询，需要设置为keyword类型，同时查询key也要添加 .keyword
+        // object直接用.查询，如address.area
+        // nested要用nested嵌套查询，注意path
+        QueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().
+                must(QueryBuilders.termQuery("address.area","南漳县"));
+        searchSourceBuilder.query(boolQueryBuilder);
+
 //        QueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().
-//                must(QueryBuilders.termQuery("address.area.keyword","南漳县"));
+//                must(QueryBuilders.matchQuery("address.area","南漳县"));
 //        searchSourceBuilder.query(boolQueryBuilder);
+
+//        NestedQueryBuilder nested = QueryBuilders.nestedQuery("address", QueryBuilders.matchQuery("address.area", "南漳县"), ScoreMode.None);
+//        searchSourceBuilder.query(nested);
+
+
+        // nested取不到数据
+//        QueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().
+//                must(QueryBuilders.termQuery("interests.name","刷视频"));
+//        searchSourceBuilder.query(boolQueryBuilder);
+
+//        QueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().
+//                must(QueryBuilders.matchQuery("interests.name","刷视频"));
+//        searchSourceBuilder.query(boolQueryBuilder);
+
+//        NestedQueryBuilder nested = QueryBuilders.nestedQuery("interests", QueryBuilders.matchQuery("interests.name", "刷视频"), ScoreMode.None);
+//        searchSourceBuilder.query(nested);
 
         searchSourceBuilder.sort("birthday", SortOrder.ASC);
         searchSourceBuilder.from(0);

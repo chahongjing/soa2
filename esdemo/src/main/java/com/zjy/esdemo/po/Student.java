@@ -29,6 +29,9 @@ public class Student {
     @Field(type = FieldType.Nested)
     private Address address;
 
+    @Field(type = FieldType.Nested)
+    private List<Interest> interests;
+
     public Student() {
 
     }
@@ -87,6 +90,14 @@ public class Student {
 
     public void setAddress(Address address) {
         this.address = address;
+    }
+
+    public List<Interest> getInterests() {
+        return interests;
+    }
+
+    public void setInterests(List<Interest> interests) {
+        this.interests = interests;
     }
 
     @Override

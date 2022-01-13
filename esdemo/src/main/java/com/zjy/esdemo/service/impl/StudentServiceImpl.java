@@ -1,34 +1,17 @@
 package com.zjy.esdemo.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.zjy.esdemo.dao.StudentDao;
 import com.zjy.esdemo.po.Address;
+import com.zjy.esdemo.po.Interest;
 import com.zjy.esdemo.po.Student;
 import com.zjy.esdemo.service.StudentService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.lucene.search.join.ScoreMode;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.text.Text;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
-import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -66,24 +49,39 @@ public class StudentServiceImpl implements StudentService {
         address.setCity("武汉市");
         address.setArea("高新区");
 
+        List<Interest> list = new ArrayList<>();
+        Interest interest = new Interest();
+        interest.setCode("1");
+        interest.setName("看书");
+        list.add(interest);
+        interest = new Interest();
+        interest.setCode("2");
+        interest.setName("打游戏");
+        list.add(interest);
+
         Student student = new Student(1L, "刘伯", 21, scores, new Date(2022 - 1900, Calendar.JANUARY, 2, 3, 4, 5));
         student.setAddress(address);
+        student.setInterests(list);
         studentDao.save(student);
 
         student = new Student(2L, "刘思想", 35, scores, new Date(2022 - 1900, Calendar.JANUARY, 3, 7, 5, 35));
         student.setAddress(address);
+        student.setInterests(list);
         studentDao.save(student);
 
         student = new Student(3L, "王皮皮", 45, scores, new Date(2022 - 1900, Calendar.JANUARY, 4, 8, 24, 45));
         student.setAddress(address);
+        student.setInterests(list);
         studentDao.save(student);
 
         student = new Student(4L, "王二丫", 23, scores, new Date(2022 - 1900, Calendar.JANUARY, 5, 19, 54, 32));
         student.setAddress(address);
+        student.setInterests(list);
         studentDao.save(student);
 
         student = new Student(5L, "王铁蛋", 51, scores, new Date(2022 - 1900, Calendar.JANUARY, 6, 12, 33, 18));
         student.setAddress(address);
+        student.setInterests(list);
         studentDao.save(student);
     }
 
@@ -124,11 +122,22 @@ public class StudentServiceImpl implements StudentService {
     public void insertDoc(String index) {
         Student student = new Student(6L, "黄金", 65, new ArrayList<>(), new Date(2022 - 1900, Calendar.FEBRUARY, 5, 23, 52, 18));
 
+        List<Interest> list = new ArrayList<>();
+        Interest interest = new Interest();
+        interest.setCode("1");
+        interest.setName("看电影");
+        list.add(interest);
+        interest = new Interest();
+        interest.setCode("2");
+        interest.setName("打游戏");
+        list.add(interest);
+
         Address address = new Address();
         address.setProvince("北京市");
         address.setCity("北京市");
         address.setArea("海淀区");
         student.setAddress(address);
+        student.setInterests(list);
         esUtils.insertDoc(index, student.getStudentId().toString(), student);
     }
 
@@ -144,11 +153,23 @@ public class StudentServiceImpl implements StudentService {
         address.setProvince("湖北省");
         address.setCity("襄阳市");
         address.setArea("南漳县");
+        List<Interest> interests = new ArrayList<>();
+        Interest interest = new Interest();
+        interest.setCode("1");
+        interest.setName("写代码");
+        interests.add(interest);
+        interest = new Interest();
+        interest.setCode("2");
+        interest.setName("刷视频");
+        interests.add(interest);
+
         Student student = new Student(7L, "黄金", 65, new ArrayList<>(), new Date(2022 - 1900, Calendar.APRIL, 5, 23, 52, 18));
         student.setAddress(address);
+        student.setInterests(interests);
         list.add(student);
         student = new Student(8L, "白银", 34, new ArrayList<>(), new Date(2022 - 1900, Calendar.APRIL, 27, 6, 29, 41));
         student.setAddress(address);
+        student.setInterests(interests);
         list.add(student);
         esUtils.bulkInsert(index, list);
 //        esUtils.bulkIndex(index, list);

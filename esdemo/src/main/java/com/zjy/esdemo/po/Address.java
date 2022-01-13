@@ -4,11 +4,11 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 public class Address {
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Keyword)
     private String province;
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Keyword)
     private String city;
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Keyword)
     private String area;
 
     public String getProvince() {
