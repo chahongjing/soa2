@@ -9,7 +9,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,8 +39,8 @@ public class EsEnvProperties {
      * @return
      */
     @Bean
-    public RestClientBuilder restClientBuilderWithNoAuth() {
-        return RestClient.builder(new HttpHost(host, port, protocol));
+    public RestHighLevelClient restHighLevelClientBuilderWithNoAuth() {
+        return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, protocol)));
     }
 
     /**
@@ -49,11 +48,11 @@ public class EsEnvProperties {
      * @return
      */
 //    @Bean
-    public RestClientBuilder restClientBuilderWithHeaderAuth() {
+    public RestHighLevelClient restHighLevelClientBuilderWithHeaderAuth() {
         List<Header> defaultHeaders = new ArrayList<>();
         defaultHeaders.add(new BasicHeader("Authorization", "Basic abcdefefsfasdfafef=="));
-        return RestClient.builder(new HttpHost(host, port, protocol)).
-                setHttpClientConfigCallback((HttpAsyncClientBuilder builder) -> builder.setDefaultHeaders(defaultHeaders));
+        return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, protocol)).
+                setHttpClientConfigCallback((HttpAsyncClientBuilder builder) -> builder.setDefaultHeaders(defaultHeaders)));
     }
 
     /**
@@ -61,29 +60,20 @@ public class EsEnvProperties {
      * @return
      */
 //    @Bean
-    public RestClientBuilder restClientBuilderWithPasswordAuth() {
+    public RestHighLevelClient restHighLevelClientBuilderWithPasswordAuth() {
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
-        return RestClient.builder(new HttpHost(host, port, protocol)).
-                setHttpClientConfigCallback((HttpAsyncClientBuilder builder) -> builder.setDefaultCredentialsProvider(credentialsProvider));
+        return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, protocol)).
+                setHttpClientConfigCallback((HttpAsyncClientBuilder builder) -> builder.setDefaultCredentialsProvider(credentialsProvider)));
     }
 
     /**
      * restClient
-     * @param restClientBuilder
+     * @param restHighLevelClient
      * @return
      */
     @Bean
-    public RestClient restClient(@Autowired RestClientBuilder restClientBuilder) {
-        return restClientBuilder.build();
-    }
-
-    /**
-     * restHighLevelClientPre
-     * @return
-     */
-    @Bean("restHighLevelClientPre")
-    public RestHighLevelClient getRestHighLevelClient(@Autowired RestClientBuilder restClientBuilder) {
-        return new RestHighLevelClient(restClientBuilder);
+    public RestClient restClient(@Autowired RestHighLevelClient restHighLevelClient) {
+        return restHighLevelClient.getLowLevelClient();
     }
 }

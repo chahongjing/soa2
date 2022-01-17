@@ -1,6 +1,7 @@
 package com.zjy.esdemo.dao;
 
 import com.zjy.esdemo.po.Student;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 import java.util.List;
@@ -8,5 +9,5 @@ import java.util.List;
 public interface StudentDao extends ElasticsearchRepository<Student, Long> {
     List<Student> findByName(String name);
 
-//    List<Student> findByNameOrDesc(String text);
+    List<Student> findByNameOrDesc(String name, String desc, Pageable pageable);
 }

@@ -35,6 +35,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.cluster.metadata.AliasMetadata;
+import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
@@ -46,11 +47,18 @@ import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.script.ScriptType;
+import org.elasticsearch.script.mustache.SearchTemplateRequest;
+import org.elasticsearch.script.mustache.SearchTemplateResponse;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -73,10 +81,12 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 @Component
 @Slf4j
 public class EsUtils {
-    @Resource(name = "restHighLevelClientPre")
+    @Resource
     private RestHighLevelClient restHighLevelClient;
     @Resource
     private RestClient restClient;
+    @Autowired
+    ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     // region index
     public boolean createIndex(String index) throws IOException {
@@ -510,6 +520,26 @@ public class EsUtils {
             log.error("loadTestData: 读取失败");
         }
         return jsonReader;}
+
+
+
+    public void test(String index) {
+        SearchRequest search = new SearchRequest(index);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        NestedQueryBuilder nested = QueryBuilders.nestedQuery("parent", QueryBuilders.matchQuery("parent.firstName", "zhang"), ScoreMode.None);
+        searchSourceBuilder.query(nested);
+        search.source(searchSourceBuilder);
+        SearchResponse response = null;
+        try {
+            response = restHighLevelClient.search(search, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println(response.toString());
+        response.getHits().forEach(hi -> {
+            System.out.println(hi.getSourceAsString());
+        });
+    }
     // endregion
 
     private JSONObject objectToJSONObject(Student student) {
@@ -526,4 +556,85 @@ public class EsUtils {
     public static void main(String[] a) {
         new EsUtils().test();
     }
+
+    // https://www.jianshu.com/p/28120745c263
+    public String createEsTemplate(String templateid){
+
+        Request scriptRequest = new Request("POST", "_scripts/"+templateid);
+        String templateJsonString = "";
+        scriptRequest.setJsonEntity(templateJsonString);
+        RestClient restClient = restHighLevelClient.getLowLevelClient();
+        try {
+            Response response = restClient.performRequest(scriptRequest);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return "创建模板成功";
+    }
+
+    public String getEsTemplate(String templateid,Map<String,Object> map){
+        SearchTemplateRequest request = new SearchTemplateRequest();
+        request.setScriptType(ScriptType.STORED);
+        request.setScript(templateid);
+        request.setSimulate(true);
+        request.setScriptParams(map);
+        SearchTemplateResponse renderResponse = null;
+        try {
+            renderResponse = restHighLevelClient.searchTemplate(request, RequestOptions.DEFAULT);
+            BytesReference source = renderResponse.getSource();
+            return source.utf8ToString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+    public List<Map<String, Object>> useEsTemplate(String topic, String templateid, Map<String,Object> map){
+        String indexTopic = topic;
+        SearchTemplateRequest request = new SearchTemplateRequest();
+        request.setRequest(new SearchRequest(indexTopic));
+        request.setScriptType(ScriptType.STORED);
+        request.setScript(templateid);
+        request.setScriptParams(map);
+        //request.setSimulate(true);
+        SearchTemplateResponse response = null;
+        try {
+            response = restHighLevelClient.searchTemplate(request, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        SearchResponse searchResponse = response.getResponse();
+        //BytesReference source = response.getSource();
+        //打印出储存的模板
+        //System.out.println(source.utf8ToString());
+        SearchHits searchHits = searchResponse.getHits();
+        List<Map<String, Object>> maps = setSearchResponse(searchResponse, "");
+        return maps;
+        //return null;
+    }
+
+    public List<Map<String, Object>> setSearchResponse(SearchResponse searchResponse, String highlightField) {
+        //解析结果
+        ArrayList<Map<String,Object>> list = new ArrayList<>();
+        for (SearchHit hit : searchResponse.getHits().getHits()) {
+            Map<String, HighlightField> high = hit.getHighlightFields();
+            HighlightField title = high.get(highlightField);
+            hit.getSourceAsMap().put("id", hit.getId());
+            Map<String, Object> sourceAsMap = hit.getSourceAsMap();//原来的结果
+            //解析高亮字段,将原来的字段换为高亮字段
+            if (title!=null){
+                Text[] texts = title.fragments();
+                String nTitle="";
+                for (Text text : texts) {
+                    nTitle+=text;
+                }
+                //替换
+                sourceAsMap.put(highlightField,nTitle);
+            }
+            list.add(sourceAsMap);
+        }
+        return list;
+    }
+
+
 }

@@ -3,8 +3,9 @@
     "nested": {
       "path": "extra",
       "query": {
-        "match": {"extra.workOrderId":"WOCN20211205002958"}
+        "term": {"extra.workOrderId":"WOCN20211205002958"}
       }
     }
-  }
+  },
+  "_source": ["instanceId"]
 }
