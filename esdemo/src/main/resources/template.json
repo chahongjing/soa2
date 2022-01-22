@@ -1,0 +1,6 @@
+{
+  "script": {
+    "lang": "mustache",
+    "source": "{\"query\":{\"bool\":{\"must\":[{\"match\":{\"name\":\"{{name}}\"}},{\"range\":{\"age\":{\"gt\":\"{{gt}}\",\"lt\":\"{{lt}}\"}}}]}}}"
+  }
+}

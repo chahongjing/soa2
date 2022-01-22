@@ -17,6 +17,9 @@ public class Student {
     @Field(type = FieldType.Keyword)
     private String name;
 
+    @Field(type = FieldType.Keyword)
+    private String desc;
+
     @Field(type = FieldType.Integer)
     private Integer age;
 

@@ -2,12 +2,8 @@ package com.zjy.esdemo.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONReader;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.zjy.esdemo.po.Student;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.util.EntityUtils;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.indices.alias.Alias;
@@ -20,8 +16,6 @@ import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.MultiSearchRequest;
-import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -46,7 +40,6 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.script.mustache.SearchTemplateRequest;
 import org.elasticsearch.script.mustache.SearchTemplateResponse;
@@ -56,19 +49,11 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -76,17 +61,13 @@ import java.util.stream.Collectors;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 /**
- * 非starter模式，直接使用api操作es
+ * 非starter模式，直接使用highleve api操作es
  */
 @Component
 @Slf4j
-public class EsUtils {
+public class EsHighLevelOpt {
     @Resource
     private RestHighLevelClient restHighLevelClient;
-    @Resource
-    private RestClient restClient;
-    @Autowired
-    ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     // region index
     public boolean createIndex(String index) throws IOException {
@@ -108,6 +89,10 @@ public class EsUtils {
                 }
                 builder.endObject();
                 builder.startObject("name"); {
+                    builder.field("type", "keyword");
+                }
+                builder.endObject();
+                builder.startObject("desc"); {
                     builder.field("type", "text");
 //                            .field("analyzer", "ik_smart")
 //                            .field("search_analyzer", "ik_max_word");
@@ -115,20 +100,16 @@ public class EsUtils {
                 builder.endObject();
                 builder.startObject("age"); {
                     builder.field("type", "integer");
-//                            field("analyzer", "ik_smart").
-//                            field("search_analyzer", "ik_max_word");
                 }
                 builder.endObject();
                 builder.startObject("scores"); {
-                    builder.field("type", "text");
+                    builder.field("type", "double");
 //                            field("analyzer", "ik_smart").
 //                            field("search_analyzer", "ik_max_word");
                 }
                 builder.endObject();
                 builder.startObject("birthday"); {
                     builder.field("type", "long");
-//                            field("analyzer", "ik_smart").
-//                            field("search_analyzer", "ik_max_word");
                 }
                 builder.endObject();
                 builder.startObject("address"); {
@@ -138,12 +119,12 @@ public class EsUtils {
                     {
                         builder.startObject("province");
                         {
-                            builder.field("type", "text");
+                            builder.field("type", "keyword");
                         }
                         builder.endObject();
                         builder.startObject("city");
                         {
-                            builder.field("type", "text");
+                            builder.field("type", "keyword");
                         }
                         builder.endObject();
                         builder.startObject("area");
@@ -161,12 +142,12 @@ public class EsUtils {
                     {
                         builder.startObject("code");
                         {
-                            builder.field("type", "text");
+                            builder.field("type", "keyword");
                         }
                         builder.endObject();
                         builder.startObject("name");
                         {
-                            builder.field("type", "text");
+                            builder.field("type", "keyword");
                         }
                         builder.endObject();
                     }
@@ -207,14 +188,19 @@ public class EsUtils {
      * @return
      * @throws IOException
      */
-    public SearchResponse searchBySearchSourceBuilde(String index, SearchSourceBuilder searchSourceBuilder) throws IOException {
+    public SearchResponse searchBySearchSourceBuilder(String index, SearchSourceBuilder searchSourceBuilder) {
         // 组装SearchRequest请求
          SearchRequest searchRequest = new SearchRequest(index);
          searchRequest.source(searchSourceBuilder);
         // 同步获取SearchResponse结果
         log.info("es search param: {}", searchRequest.source().toString());
-         SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-         return searchResponse;
+        SearchResponse searchResponse = null;
+        try {
+            searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            log.error("es search error!", e);
+        }
+        return searchResponse;
     }
 
     public boolean insertDoc(String index, String id, Student student) {
@@ -327,30 +313,6 @@ public class EsUtils {
         }
     }
 
-    public List<Student> getList(String index, List<String> memberIds) {
-        List<Student> memberList = new ArrayList<>();
-
-        MultiSearchRequest request = new MultiSearchRequest();
-        memberIds.forEach(memberId -> {
-            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().
-                    query(QueryBuilders.matchPhraseQuery("studentId", memberId));
-            request.add(new SearchRequest()
-                    .source(searchSourceBuilder)
-                    .indices(index));
-        });
-        try {
-            MultiSearchResponse response = restHighLevelClient.msearch(request, RequestOptions.DEFAULT);
-            for (MultiSearchResponse.Item item : response.getResponses()) {
-                for (SearchHit hit : item.getResponse().getHits().getHits()) {
-                    memberList.add(JSON.parseObject(hit.getSourceAsString(), Student.class));
-                }
-            }
-        } catch (IOException e) {
-            log.error("es查询异常", e);
-        }
-        return memberList;
-    }
-
     /**
      * 获取所有索引别名
      * @return
@@ -395,7 +357,7 @@ public class EsUtils {
                 .build();
     }
 
-    public void bulkIndex(String indexName, List<Student> studentList) {
+    public void bulkInsertWithProcessor(String indexName, List<Student> studentList) {
         BulkProcessor bulkProcessor = init();
         IndexRequest request;
         try {
@@ -416,37 +378,17 @@ public class EsUtils {
     public List<Student> mulitSearch() {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-//        QueryBuilder queryBuilder = QueryBuilders.boolQuery()
-//                .must(QueryBuilders.termQuery("name", "王"))
-//                .must(QueryBuilders.rangeQuery("birthday").gte(new Date(2022 - 1900, 1 - 1, 4, 8, 24, 45).getTime()))
-//                .must(QueryBuilders.rangeQuery("birthday").lte(new Date(2022 - 1900, 1 - 1, 5, 19, 54, 32).getTime()));
-//        searchSourceBuilder.query(queryBuilder);
-
-        // object直接用.查询，如address.area
-        // nested要用nested嵌套查询，注意path
-        QueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().
-                must(QueryBuilders.termQuery("address.area","南漳县"));
-        searchSourceBuilder.query(boolQueryBuilder);
-
-//        QueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().
-//                must(QueryBuilders.matchQuery("address.area","南漳县"));
-//        searchSourceBuilder.query(boolQueryBuilder);
-
-//        NestedQueryBuilder nested = QueryBuilders.nestedQuery("address", QueryBuilders.matchQuery("address.area", "南漳县"), ScoreMode.None);
-//        searchSourceBuilder.query(nested);
+        QueryBuilder queryBuilder = QueryBuilders.boolQuery()
+                .must(QueryBuilders.termQuery("name", "王"))
+                .must(QueryBuilders.rangeQuery("birthday").gte(new Date(2022 - 1900, 1 - 1, 4, 8, 24, 45).getTime()))
+                .must(QueryBuilders.rangeQuery("birthday").lte(new Date(2022 - 1900, 1 - 1, 5, 19, 54, 32).getTime()));
+        searchSourceBuilder.query(queryBuilder);
 
 
-        // nested取不到数据
-//        QueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().
-//                must(QueryBuilders.termQuery("interests.name","刷视频"));
-//        searchSourceBuilder.query(boolQueryBuilder);
 
-//        QueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().
-//                must(QueryBuilders.matchQuery("interests.name","刷视频"));
-//        searchSourceBuilder.query(boolQueryBuilder);
 
-//        NestedQueryBuilder nested = QueryBuilders.nestedQuery("interests", QueryBuilders.matchQuery("interests.name", "刷视频"), ScoreMode.None);
-//        searchSourceBuilder.query(nested);
+
+
 
         searchSourceBuilder.sort("birthday", SortOrder.ASC);
         searchSourceBuilder.from(0);
@@ -462,16 +404,14 @@ public class EsUtils {
         highlightBuilder.numOfFragments(0);
         searchSourceBuilder.highlighter(highlightBuilder);
 
-        SearchResponse searchResponse = null;
-        try {
-            searchResponse = searchBySearchSourceBuilde("student_index", searchSourceBuilder);
-        } catch (Exception e) {
-            log.error("es search error", e);
-            throw new RuntimeException(e.getMessage());
+        List<Student> studentList = new ArrayList<>();
+        SearchResponse searchResponse = searchBySearchSourceBuilder("student_index", searchSourceBuilder);
+        if(searchResponse == null) {
+            return studentList;
         }
+
         SearchHit[] hitsArr = searchResponse.getHits().getHits();
         log.info("es search took: {}", searchResponse.getTook());
-        List<Student> studentList = new ArrayList<>();
         for (SearchHit hit : hitsArr) {
             Student student = JSONObject.parseObject(hit.getSourceAsString(), Student.class);
             if(!CollectionUtils.isEmpty(hit.getHighlightFields())) {
@@ -486,55 +426,36 @@ public class EsUtils {
     }
 
     /**
-     * restclient查询es
+     * object搜索
+     * object直接用.查询，如address.area。注意如果索引类型是nested，此操作无法查出数据
+     * nested要用nested嵌套查询，注意path
+     * @param index
      */
-    public void test() {
-        Request request = new Request("GET", "/student_index/_search");
-        String jsonPath = "request.json";
-        JSONReader reader = getJsonReader(jsonPath);
-        request.setJsonEntity(reader.readString());
-        try {
-            Response response = restClient.performRequest(request);
-            int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode < 200 || 300 <= statusCode) {
-                log.error("HTTP status code {}", response.getStatusLine().getStatusCode());
-                throw new RuntimeException("HTTP status code is not 200");
-            }
-            String respBodyStr = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-            JSONObject jsonObject = JSON.parseObject(respBodyStr);
-        } catch (IOException e) {
-            log.error("restclient request error!", e);
-        }
+    public void searchInObject(String index) {
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        QueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().
+                must(QueryBuilders.termQuery("address.area","南漳县"));
+        searchSourceBuilder.query(boolQueryBuilder);
+
+        SearchResponse response = searchBySearchSourceBuilder(index, searchSourceBuilder);
+        System.out.println(response.toString());
+        response.getHits().forEach(hi -> {
+            System.out.println(hi.getSourceAsString());
+        });
     }
 
-    private JSONReader getJsonReader(String srcPath) {
-        JSONReader jsonReader = null;
-        try {
-            String resource = this.getClass().getClassLoader().getResource("").toString();
-            if(resource.startsWith("file:/")) {
-                resource = resource.substring(6);
-            }
-            FileReader fileReader=new FileReader(resource + srcPath);
-            jsonReader = new JSONReader(fileReader);
-        } catch (Exception e) {
-            log.error("loadTestData: 读取失败");
-        }
-        return jsonReader;}
-
-
-
-    public void test(String index) {
-        SearchRequest search = new SearchRequest(index);
+    /**
+     * nest搜索。注意如果索引类型不是nested，此操作无法查出数据
+     * @param index
+     */
+    public void searchNested(String index) {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        NestedQueryBuilder nested = QueryBuilders.nestedQuery("parent", QueryBuilders.matchQuery("parent.firstName", "zhang"), ScoreMode.None);
+        NestedQueryBuilder nested = QueryBuilders.nestedQuery("interests",
+                QueryBuilders.matchQuery("interests.name", "刷视频"),
+                ScoreMode.None);
         searchSourceBuilder.query(nested);
-        search.source(searchSourceBuilder);
-        SearchResponse response = null;
-        try {
-            response = restHighLevelClient.search(search, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        SearchResponse response = searchBySearchSourceBuilder(index, searchSourceBuilder);
         System.out.println(response.toString());
         response.getHits().forEach(hi -> {
             System.out.println(hi.getSourceAsString());
@@ -542,26 +463,10 @@ public class EsUtils {
     }
     // endregion
 
-    private JSONObject objectToJSONObject(Student student) {
-        JSONObject jsonObject = (JSONObject)JSON.toJSON(student);
-        jsonObject.forEach((key, value) -> {
-            if(value != null && value.getClass() == Date.class) {
-                jsonObject.put(key, ((Date) value).getTime());
-            }
-        });
-        jsonObject.put("_class", student.getClass().getTypeName());
-        return jsonObject;
-    }
-
-    public static void main(String[] a) {
-        new EsUtils().test();
-    }
-
-    // https://www.jianshu.com/p/28120745c263
+    // region 模板
     public String createEsTemplate(String templateid){
-
-        Request scriptRequest = new Request("POST", "_scripts/"+templateid);
-        String templateJsonString = "";
+        Request scriptRequest = new Request("POST", "_scripts/" + templateid);
+        String templateJsonString = Utils.getJsonReader("template.json");
         scriptRequest.setJsonEntity(templateJsonString);
         RestClient restClient = restHighLevelClient.getLowLevelClient();
         try {
@@ -573,7 +478,7 @@ public class EsUtils {
         return "创建模板成功";
     }
 
-    public String getEsTemplate(String templateid,Map<String,Object> map){
+    public String getEsTemplate(String templateid, Map<String,Object> map){
         SearchTemplateRequest request = new SearchTemplateRequest();
         request.setScriptType(ScriptType.STORED);
         request.setScript(templateid);
@@ -589,10 +494,10 @@ public class EsUtils {
         }
         return "";
     }
+
     public List<Map<String, Object>> useEsTemplate(String topic, String templateid, Map<String,Object> map){
-        String indexTopic = topic;
         SearchTemplateRequest request = new SearchTemplateRequest();
-        request.setRequest(new SearchRequest(indexTopic));
+        request.setRequest(new SearchRequest(topic));
         request.setScriptType(ScriptType.STORED);
         request.setScript(templateid);
         request.setScriptParams(map);
@@ -635,6 +540,18 @@ public class EsUtils {
         }
         return list;
     }
+    // endregion
 
-
+    // region 辅助方法
+    private JSONObject objectToJSONObject(Student student) {
+        JSONObject jsonObject = (JSONObject)JSON.toJSON(student);
+        jsonObject.forEach((key, value) -> {
+            if(value != null && value.getClass() == Date.class) {
+                jsonObject.put(key, ((Date) value).getTime());
+            }
+        });
+        jsonObject.put("_class", student.getClass().getTypeName());
+        return jsonObject;
+    }
+    // endregion
 }

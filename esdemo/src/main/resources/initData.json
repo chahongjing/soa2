@@ -1,0 +1,198 @@
+[
+  {
+    "address": {
+      "area": "高新区",
+      "city": "武汉市",
+      "province": "湖北省"
+    },
+    "age": 21,
+    "birthday": 1641063845000,
+    "interests": [
+      {
+        "code": "1",
+        "name": "看书"
+      },
+      {
+        "code": "2",
+        "name": "打游戏"
+      }
+    ],
+    "name": "刘伯",
+    "scores": [
+      67.2,
+      27.2,
+      56.2
+    ],
+    "studentId": 1
+  },
+  {
+    "address": {
+      "area": "高新区",
+      "city": "武汉市",
+      "province": "湖北省"
+    },
+    "age": 35,
+    "birthday": 1641164735000,
+    "interests": [
+      {
+        "code": "1",
+        "name": "看书"
+      },
+      {
+        "code": "2",
+        "name": "打游戏"
+      }
+    ],
+    "name": "刘思想",
+    "scores": [
+      67.2,
+      27.2,
+      56.2
+    ],
+    "studentId": 2
+  },
+  {
+    "address": {
+      "area": "高新区",
+      "city": "武汉市",
+      "province": "湖北省"
+    },
+    "age": 45,
+    "birthday": 1641255885000,
+    "interests": [
+      {
+        "code": "1",
+        "name": "看书"
+      },
+      {
+        "code": "2",
+        "name": "打游戏"
+      }
+    ],
+    "name": "王皮皮",
+    "scores": [
+      67.2,
+      27.2,
+      56.2
+    ],
+    "studentId": 3
+  },
+  {
+    "address": {
+      "area": "高新区",
+      "city": "武汉市",
+      "province": "湖北省"
+    },
+    "age": 23,
+    "birthday": 1641383672000,
+    "interests": [
+      {
+        "code": "1",
+        "name": "看书"
+      },
+      {
+        "code": "2",
+        "name": "打游戏"
+      }
+    ],
+    "name": "王二丫",
+    "scores": [
+      67.2,
+      27.2,
+      56.2
+    ],
+    "studentId": 4
+  },
+  {
+    "address": {
+      "area": "高新区",
+      "city": "武汉市",
+      "province": "湖北省"
+    },
+    "age": 51,
+    "birthday": 1641443598000,
+    "interests": [
+      {
+        "code": "1",
+        "name": "看书"
+      },
+      {
+        "code": "2",
+        "name": "打游戏"
+      }
+    ],
+    "name": "王铁蛋",
+    "scores": [
+      67.2,
+      27.2,
+      56.2
+    ],
+    "studentId": 5
+  },
+  {
+    "address": {
+      "area": "海淀区",
+      "city": "北京市",
+      "province": "北京市"
+    },
+    "age": 65,
+    "birthday": 1644076338000,
+    "interests": [
+      {
+        "code": "1",
+        "name": "看电影"
+      },
+      {
+        "code": "2",
+        "name": "打游戏"
+      }
+    ],
+    "name": "黄金",
+    "scores": [],
+    "studentId": 6
+  },
+  {
+    "address": {
+      "area": "南漳县",
+      "city": "襄阳市",
+      "province": "湖北省"
+    },
+    "age": 65,
+    "birthday": 1649173938000,
+    "interests": [
+      {
+        "code": "1",
+        "name": "写代码"
+      },
+      {
+        "code": "2",
+        "name": "刷视频"
+      }
+    ],
+    "name": "黄金",
+    "scores": [],
+    "studentId": 7
+  },
+  {
+    "address": {
+      "area": "南漳县",
+      "city": "襄阳市",
+      "province": "湖北省"
+    },
+    "age": 34,
+    "birthday": 1651012181000,
+    "interests": [
+      {
+        "code": "1",
+        "name": "写代码"
+      },
+      {
+        "code": "2",
+        "name": "刷视频"
+      }
+    ],
+    "name": "白银",
+    "scores": [3, 6],
+    "studentId": 8
+  }
+]

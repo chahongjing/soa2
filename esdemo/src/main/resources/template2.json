@@ -1,0 +1,7 @@
+{
+//  添加判断条件,避免map不传入报错  {{#}}{{/}}组合来进行判断
+  "script": {
+    "lang": "mustache",
+    "source": "{\"query\":{\"bool\":{\"must\":[{{#address}}{\"match\":{\"address\":\"{{address}}\"}}{{/address}}{{#gt}}{{#lt}}{{#address}},{{/address}}{\"range\":{\"age\":{\"gt\":\"{{gt}}\",\"lt\":\"{{lt}}\"}}}{{/lt}}{{/gt}}]}}}"
+  }
+}

@@ -35,9 +35,6 @@ import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 @Slf4j
 public class StudentServiceImpl implements StudentService {
 
-    @Resource
-    private EsUtils esUtils;
-
     @Autowired
     StudentDao studentDao;
 
@@ -125,92 +122,6 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public void deleteAll() {
         studentDao.deleteAll();
-    }
-
-    @Override
-    public void createIndex(String index) {
-        try {
-            esUtils.createIndex(index);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void deleteIndex(String index) {
-        try {
-            esUtils.deleteIndex(index);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void update(String index, long id, int age) {
-        esUtils.updateDoc2(index, String.valueOf(id), age);
-    }
-
-    @Override
-    public void insertDoc(String index) {
-        Student student = new Student(6L, "黄金", 65, new ArrayList<>(), new Date(2022 - 1900, Calendar.FEBRUARY, 5, 23, 52, 18));
-
-        List<Interest> list = new ArrayList<>();
-        Interest interest = new Interest();
-        interest.setCode("1");
-        interest.setName("看电影");
-        list.add(interest);
-        interest = new Interest();
-        interest.setCode("2");
-        interest.setName("打游戏");
-        list.add(interest);
-
-        Address address = new Address();
-        address.setProvince("北京市");
-        address.setCity("北京市");
-        address.setArea("海淀区");
-        student.setAddress(address);
-        student.setInterests(list);
-        esUtils.insertDoc(index, student.getStudentId().toString(), student);
-    }
-
-    @Override
-    public void deleteDoc(String index, String id) {
-        esUtils.deleteDoc(index, id);
-    }
-
-    @Override
-    public void batchInsertDoc(String index) {
-        List<Student> list = new ArrayList<>();
-        Address address = new Address();
-        address.setProvince("湖北省");
-        address.setCity("襄阳市");
-        address.setArea("南漳县");
-        List<Interest> interests = new ArrayList<>();
-        Interest interest = new Interest();
-        interest.setCode("1");
-        interest.setName("写代码");
-        interests.add(interest);
-        interest = new Interest();
-        interest.setCode("2");
-        interest.setName("刷视频");
-        interests.add(interest);
-
-        Student student = new Student(7L, "黄金", 65, new ArrayList<>(), new Date(2022 - 1900, Calendar.APRIL, 5, 23, 52, 18));
-        student.setAddress(address);
-        student.setInterests(interests);
-        list.add(student);
-        student = new Student(8L, "白银", 34, new ArrayList<>(), new Date(2022 - 1900, Calendar.APRIL, 27, 6, 29, 41));
-        student.setAddress(address);
-        student.setInterests(interests);
-        list.add(student);
-        esUtils.bulkInsert(index, list);
-//        esUtils.bulkIndex(index, list);
-    }
-
-
-    //查询
-    public List<Student> search() {
-        return esUtils.mulitSearch();
     }
 
 

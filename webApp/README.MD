@@ -39,7 +39,7 @@ xpack.ml.enabled: false
 4. 命令行查询`curl http://localhost:9200/student_index/_search/ -X POST -d '{"query":{"term":{"address.area.keyword":"南漳县"}}}' --header "Content-Type: application/json"`
 ### kibana
 1. 启动kibana:`/usr/share/kibana/bin/kibana`。然后访问服务：[kibana](http://127.0.0.1:5601)
-2. 访问本地es。打开文件config/kibana.yml。放开elasticsearch.hosts: ["http://localhost:9200"]的注释
+2. 访问本地es。打开文件config/kibana.yml。放开`elasticsearch.hosts: ["http://localhost:9200"]`的注释;修改中文显示`i18n.locale: "zh-CN"`
 ### 配置
 1. 首次访问，先在访问服务生成日志，再访问kibana-->discover，填写logstash中配置(output)的日志index:applog，下一步选择@timestamp,保存。然后再进入discory就可以看到日志了
 

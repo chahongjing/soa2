@@ -1,11 +1,11 @@
 {
   "query": {
     "nested": {
-      "path": "extra",
+      "path": "interests",
       "query": {
-        "term": {"extra.workOrderId":"WOCN20211205002958"}
+        "term": {"interests.name": "写代码"}
       }
     }
   },
-  "_source": ["instanceId"]
+  "_source": ["studentId", "name", "address","interests", "scores"]
 }
