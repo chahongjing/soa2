@@ -99,7 +99,7 @@ public class EsHighLevelOpt {
                 }
                 builder.endObject();
                 builder.startObject("age"); {
-                    builder.field("type", "integer");
+                    builder.field("type", "integer_range");
                 }
                 builder.endObject();
                 builder.startObject("scores"); {

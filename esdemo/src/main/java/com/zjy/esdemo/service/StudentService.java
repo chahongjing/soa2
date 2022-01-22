@@ -14,4 +14,6 @@ public interface StudentService {
     void save(Student bean);
 
     void deleteAll();
+
+    List<Student> testNativeSearchQuery();
 }

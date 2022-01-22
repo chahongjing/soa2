@@ -20,7 +20,7 @@ public class Student {
     @Field(type = FieldType.Keyword)
     private String desc;
 
-    @Field(type = FieldType.Integer)
+    @Field(type = FieldType.Integer_Range)
     private Integer age;
 
     @Field(type = FieldType.Auto)
@@ -101,6 +101,14 @@ public class Student {
 
     public void setInterests(List<Interest> interests) {
         this.interests = interests;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 
     @Override

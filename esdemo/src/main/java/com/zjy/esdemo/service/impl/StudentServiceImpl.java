@@ -6,12 +6,15 @@ import com.zjy.esdemo.po.Interest;
 import com.zjy.esdemo.po.Student;
 import com.zjy.esdemo.service.StudentService;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.Operator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -19,9 +22,8 @@ import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchPhraseQuery;
@@ -125,80 +127,87 @@ public class StudentServiceImpl implements StudentService {
     }
 
 
-    public void testFindByTitle() throws Exception {
-        List<Student> list = studentDao.findByName("外交部");
-        list.stream().forEach(a -> System.out.println(a));
-    }
-
     public void testFindByTitleOrContent() throws Exception {
         Pageable pageable = PageRequest.of(0, 5);
-        studentDao.findByNameOrDesc("外交部", "美国", pageable).forEach(a -> System.out.println(a));
-        /*list.stream().forEach(a-> System.out.println(a));*/
+        studentDao.findByNameOrDesc("外交部", "美国", pageable).forEach(System.out::println);
     }
 
-    public void testNativeSearchQuery() throws Exception {
-        NativeSearchQuery query = new NativeSearchQueryBuilder().withQuery(queryStringQuery("我想进外交部")
-                .defaultField("title")).withPageable(PageRequest.of(0, 5)).build();
-        elasticsearchRestTemplate.search(query, Student.class).stream().forEach(a -> System.out.println(a));
+    @Override
+    public List<Student> testNativeSearchQuery() {
+        NativeSearchQuery query = new NativeSearchQueryBuilder().withQuery(queryStringQuery("黄金")
+                .defaultField("name")).withPageable(PageRequest.of(0, 5)).build();
+        return querySearch(query);
     }
 
     // https://blog.csdn.net/tianyaleixiaowu/article/details/77965257
-    public Object singleTitle(String word, @PageableDefault Pageable pageable) {
+    public List<Student> singleTitle(String name, @PageableDefault Pageable pageable) {
         //使用queryStringQuery完成单字符串查询
-        Query searchQuery = new NativeSearchQueryBuilder().withQuery(queryStringQuery(word)).withPageable(pageable).build();
-        return elasticsearchRestTemplate.search(searchQuery, Student.class);
+        Query searchQuery = new NativeSearchQueryBuilder().withQuery(queryStringQuery(name)).withPageable(pageable).build();
+        return querySearch(searchQuery);
     }
 
-    public Object singlePost(String word, @PageableDefault(sort = "weight", direction = Sort.Direction.DESC) Pageable pageable) {
+    public Object singlePost(String name, @PageableDefault(sort = "age", direction = Sort.Direction.DESC) Pageable pageable) {
         //使用queryStringQuery完成单字符串查询
-        Query searchQuery = new NativeSearchQueryBuilder().withQuery(queryStringQuery(word)).withPageable(pageable).build();
-        return elasticsearchRestTemplate.search(searchQuery, Student.class);
+        Query searchQuery = new NativeSearchQueryBuilder().withQuery(queryStringQuery(name)).withPageable(pageable).build();
+        return querySearch(searchQuery);
     }
 
-    public Object singleMatch(String content, Integer userId, @PageableDefault Pageable pageable) {
-        Query searchQuery = new NativeSearchQueryBuilder().withQuery(matchQuery("content", content)).withPageable(pageable).build();
-        //        SearchQuery searchQuery = new NativeSearchQueryBuilder().withQuery(matchQuery("userId", userId)).withPageable(pageable).build();
-        return elasticsearchRestTemplate.search(searchQuery, Student.class);
+    public List<Student> singleMatch(String name, @PageableDefault Pageable pageable) {
+        Query searchQuery = new NativeSearchQueryBuilder().withQuery(matchQuery("name", name)).withPageable(pageable).build();
+        return querySearch(searchQuery);
     }
 
-    public Object singlePhraseMatch(String content, @PageableDefault Pageable pageable) {
-        Query searchQuery = new NativeSearchQueryBuilder().withQuery(matchPhraseQuery("content", content)).withPageable(pageable).build();
-        return elasticsearchRestTemplate.search(searchQuery, Student.class);
+    public List<Student> singlePhraseMatch(String name, @PageableDefault Pageable pageable) {
+        Query searchQuery = new NativeSearchQueryBuilder().withQuery(matchPhraseQuery("name", name)).withPageable(pageable).build();
+        return querySearch(searchQuery);
     }
 
-    public Object singlePhraseMatch2(String content, @PageableDefault Pageable pageable) {
+    public List<Student> singlePhraseMatch2(String name, @PageableDefault Pageable pageable) {
         //        Query searchQuery = new NativeSearchQueryBuilder().withQuery(matchPhraseQuery("content", content)).withPageable(pageable).build();少匹配一个分词也OK、
-        Query searchQuery = new NativeSearchQueryBuilder().withQuery(matchPhraseQuery("content", content).slop(2)).withPageable(pageable).build();
-        return elasticsearchRestTemplate.search(searchQuery, Student.class);
+        Query searchQuery = new NativeSearchQueryBuilder().withQuery(matchPhraseQuery("name", name).slop(2)).withPageable(pageable).build();
+        return querySearch(searchQuery);
     }
 
-    public Object singleTerm(Integer userId, @PageableDefault Pageable pageable) {
+    public List<Student> singleTerm(String name, @PageableDefault Pageable pageable) {
         //不对传来的值分词，去找完全匹配的
-        Query searchQuery = new NativeSearchQueryBuilder().withQuery(termQuery("userId", userId)).withPageable(pageable).build();
-        return elasticsearchRestTemplate.search(searchQuery, Student.class);
+        Query searchQuery = new NativeSearchQueryBuilder().withQuery(termQuery("name", name)).withPageable(pageable).build();
+        return querySearch(searchQuery);
     }
 
-    public Object singleUserId (String title, @PageableDefault(sort = "weight", direction = Sort.Direction.DESC) Pageable pageable){
-        Query searchQuery = new NativeSearchQueryBuilder().withQuery(multiMatchQuery(title, "title", "content")).withPageable(pageable).build();
-        return elasticsearchRestTemplate.search(searchQuery, Student.class);
+    public List<Student> singleUserId (String title, @PageableDefault(sort = "age", direction = Sort.Direction.DESC) Pageable pageable){
+        Query searchQuery = new NativeSearchQueryBuilder().withQuery(multiMatchQuery(title, "name", "desc")).withPageable(pageable).build();
+        return querySearch(searchQuery);
     }
 
-    public Object contain (String title) {
-        Query searchQuery = new NativeSearchQueryBuilder().withQuery(matchQuery("title", title).operator(Operator.AND)).build();
-        return elasticsearchRestTemplate.search(searchQuery, Student.class);
+        public List<Student> contain (String name) {
+        Query searchQuery = new NativeSearchQueryBuilder().withQuery(matchQuery("name", name).operator(Operator.AND)).build();
+        return querySearch(searchQuery);
     }
-    public Object contain2 (String title){
-        Query searchQuery = new NativeSearchQueryBuilder().withQuery(matchQuery("title", title).operator(Operator.AND).minimumShouldMatch("75%")).build();
-        return elasticsearchRestTemplate.search(searchQuery, Student.class);
+    public List<Student> contain2 (String name){
+        Query searchQuery = new NativeSearchQueryBuilder().withQuery(matchQuery("name", name).operator(Operator.AND).minimumShouldMatch("75%")).build();
+        return querySearch(searchQuery);
     }
 
-    public Object bool (String title, Integer userId, Integer weight){
+    public List<Student> bool (String name, String desc, Integer age){
+        BoolQueryBuilder shouldBuilder = new BoolQueryBuilder();
+        shouldBuilder.should(rangeQuery("age").lt(age).gt(3));
+
         Query searchQuery = new NativeSearchQueryBuilder().withQuery(
                 boolQuery().
-                        must(termQuery("userId", userId)).
-                        should(rangeQuery("weight").lt(weight)).
-                        must(matchQuery("title", title))).
+                        must(matchQuery("name", name)).
+                        must(termQuery("desc", desc)).
+                        must(shouldBuilder)).
+//                        should(rangeQuery("age").lt(age).gt(3))).
                 build();
-        return elasticsearchRestTemplate.search(searchQuery, Student.class);
+        return querySearch(searchQuery);
+    }
+
+    List<Student> querySearch(Query query) {
+        String queryStr = ((NativeSearchQuery) query).getQuery().toString();
+        queryStr = "{\"query\":" + queryStr + "}";
+        log.info("query String\r{}", queryStr);
+        SearchHits<Student> hitsList = elasticsearchRestTemplate.search(query, Student.class);
+        List<Student> list = hitsList.getSearchHits().stream().map(SearchHit::getContent).collect(Collectors.toList());
+        return list;
     }
 }

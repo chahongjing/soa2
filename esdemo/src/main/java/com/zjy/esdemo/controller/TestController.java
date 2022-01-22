@@ -6,8 +6,10 @@ import com.zjy.esdemo.service.StudentHighLevelService;
 import com.zjy.esdemo.service.StudentLowLevelService;
 import com.zjy.esdemo.service.StudentService;
 import com.zjy.esdemo.service.impl.EsHighLevelOpt;
+import com.zjy.esdemo.service.impl.StudentServiceImpl;
 import com.zjy.esdemo.service.impl.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -65,6 +67,14 @@ public class TestController {
     public String deleteAll() {
         studentService.deleteAll();
         return "success";
+    }
+
+    @RequestMapping("test")
+    public String test() {
+//        List<Student> list = ((StudentServiceImpl) studentService).contain("王二丫");
+//        List<Student> list = ((StudentServiceImpl) studentService).contain("王二丫", PageRequest.of(0, 5));
+        List<Student> list = ((StudentServiceImpl) studentService).bool("王二丫", "jkl", 25);
+        return JSON.toJSONString(list);
     }
     // endregion
 
