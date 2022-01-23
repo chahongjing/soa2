@@ -11,7 +11,7 @@ import java.util.List;
 @Document(indexName = "student_index")
 public class Student {
     @Id
-    @Field(type = FieldType.Long)
+    @Field(type = FieldType.Keyword)
     private Long studentId;
 
     @Field(type = FieldType.Keyword)
@@ -20,7 +20,7 @@ public class Student {
     @Field(type = FieldType.Keyword)
     private String desc;
 
-    @Field(type = FieldType.Integer_Range)
+    @Field(type = FieldType.Integer)
     private Integer age;
 
     @Field(type = FieldType.Auto)
@@ -29,7 +29,7 @@ public class Student {
     @Field(type = FieldType.Long)
     private Date birthday;
 
-    @Field(type = FieldType.Nested)
+    @Field(type = FieldType.Object)
     private Address address;
 
     @Field(type = FieldType.Nested)

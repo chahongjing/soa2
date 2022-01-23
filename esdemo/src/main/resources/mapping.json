@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "_class": {
+      "type": "keyword"
+    },
+    "studentId": {
+      "type": "keyword"
+    },
+    "name": {
+      "type": "keyword"
+    },
+    "desc": {
+      "type": "text"
+    },
+    "age": {
+      "type": "integer"
+    },
+    "scores": {
+      "type": "double"
+    },
+    "birthday": {
+      "type": "long"
+    },
+    "address": {
+      "type": "object",
+      "properties": {
+        "_class": {
+          "type": "keyword"
+        },
+        "province": {
+          "type": "keyword"
+        },
+        "city": {
+          "type": "keyword"
+        },
+        "area": {
+          "type": "keyword"
+        }
+      }
+    },
+    "interests": {
+      "type": "nested",
+      "properties": {
+        "_class": {
+          "type": "keyword"
+        },
+        "code": {
+          "type": "keyword"
+        },
+        "name": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

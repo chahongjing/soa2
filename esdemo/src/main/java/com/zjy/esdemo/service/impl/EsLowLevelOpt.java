@@ -91,8 +91,8 @@ public class EsLowLevelOpt {
      * restclient查询es
      */
     public List<Student> queryList() {
-        Request request = new Request("GET", "/student_index/_search");
-        request.setJsonEntity(Utils.getJsonReader("request3.json"));
+        Request request = new Request("GET", "/" + Constants.STUDENT_INDEX + "/_search");
+        request.setJsonEntity(Utils.getJsonByTemplate("request3.json"));
         try {
             Response response = restClient.performRequest(request);
             int statusCode = response.getStatusLine().getStatusCode();

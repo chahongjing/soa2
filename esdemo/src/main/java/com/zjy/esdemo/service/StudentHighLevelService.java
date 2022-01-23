@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface StudentHighLevelService {
 
-    void createIndex(String index);
+    boolean createIndex(String index);
 
-    void deleteIndex(String index);
+    boolean deleteIndex(String index);
 
     void insert(String index, Student student);
 
@@ -21,6 +21,8 @@ public interface StudentHighLevelService {
     void update(String index, long id, int age);
 
     void deleteDoc(String index, String id);
+
+    Student get(Long id);
 
     List<Student> search();
 

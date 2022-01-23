@@ -16,4 +16,6 @@ public interface StudentService {
     void deleteAll();
 
     List<Student> testNativeSearchQuery();
+
+    boolean createIndex();
 }

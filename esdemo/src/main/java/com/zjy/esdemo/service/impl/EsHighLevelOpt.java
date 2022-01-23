@@ -14,18 +14,15 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
-import org.elasticsearch.client.GetAliasesResponse;
-import org.elasticsearch.client.Request;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.Response;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.*;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.cluster.metadata.AliasMetadata;
@@ -40,6 +37,11 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.elasticsearch.index.reindex.UpdateByQueryRequest;
+import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.script.mustache.SearchTemplateRequest;
 import org.elasticsearch.script.mustache.SearchTemplateResponse;
@@ -58,6 +60,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static com.zjy.esdemo.service.impl.Constants.STUDENT_INDEX;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 /**
@@ -71,6 +74,9 @@ public class EsHighLevelOpt {
 
     // region index
     public boolean createIndex(String index) throws IOException {
+        if (indexExists(index)) {
+            return false;
+        }
         CreateIndexRequest cir = new CreateIndexRequest(index);
         cir.alias(new Alias("学生信息索引"));
 
@@ -84,8 +90,12 @@ public class EsHighLevelOpt {
         XContentBuilder builder = jsonBuilder();
         builder.startObject(); {
             builder.startObject("properties"); {
+                builder.startObject("_class"); {
+                    builder.field("type", "keyword");
+                }
+                builder.endObject();
                 builder.startObject("studentId"); {
-                    builder.field("type", "long");
+                    builder.field("type", "keyword");
                 }
                 builder.endObject();
                 builder.startObject("name"); {
@@ -99,7 +109,7 @@ public class EsHighLevelOpt {
                 }
                 builder.endObject();
                 builder.startObject("age"); {
-                    builder.field("type", "integer_range");
+                    builder.field("type", "integer");
                 }
                 builder.endObject();
                 builder.startObject("scores"); {
@@ -117,6 +127,12 @@ public class EsHighLevelOpt {
 
                     builder.startObject("properties");
                     {
+                        builder.startObject("_class");
+                        {
+                            builder.field("type", "keyword");
+                        }
+                        builder.endObject();
+
                         builder.startObject("province");
                         {
                             builder.field("type", "keyword");
@@ -140,6 +156,11 @@ public class EsHighLevelOpt {
                     builder.field("type", "nested");
                     builder.startObject("properties");
                     {
+                        builder.startObject("_class");
+                        {
+                            builder.field("type", "keyword");
+                        }
+                        builder.endObject();
                         builder.startObject("code");
                         {
                             builder.field("type", "keyword");
@@ -158,7 +179,8 @@ public class EsHighLevelOpt {
             builder.endObject();
         }
         builder.endObject();
-        cir.mapping(builder);
+//        cir.mapping(builder);
+        cir.mapping(Utils.getJsonByTemplate("mapping.json"), XContentType.JSON);
         log.info("mapping:{}", JSON.toJSONString(builder));
         return restHighLevelClient.indices().create(cir, RequestOptions.DEFAULT).isAcknowledged();
     }
@@ -175,8 +197,11 @@ public class EsHighLevelOpt {
     }
 
     public boolean deleteIndex(String index) throws IOException {
-        DeleteIndexRequest dir = new DeleteIndexRequest(index);
-        return restHighLevelClient.indices().delete(dir, RequestOptions.DEFAULT).isAcknowledged();
+        if (indexExists(index)) {
+            DeleteIndexRequest dir = new DeleteIndexRequest(index);
+            return restHighLevelClient.indices().delete(dir, RequestOptions.DEFAULT).isAcknowledged();
+        }
+        return false;
     }
     // endregion
 
@@ -205,6 +230,7 @@ public class EsHighLevelOpt {
 
     public boolean insertDoc(String index, String id, Student student) {
         try {
+//            Requests.createIndexRequest(index);
             IndexRequest ir = new IndexRequest(index);
             ir.id(id).source(XContentFactory.jsonBuilder().value(objectToJSONObject(student)));
             IndexResponse indexResponse = restHighLevelClient.index(ir, RequestOptions.DEFAULT);
@@ -240,6 +266,7 @@ public class EsHighLevelOpt {
                     startObject().
                     field("age", age).
                     endObject();
+            // docAsUpsert
             UpdateRequest updateRequest = new UpdateRequest(index, id).doc(content);
             UpdateResponse updateResponse = restHighLevelClient.update(updateRequest, RequestOptions.DEFAULT);
             if (updateResponse.getResult() == DocWriteResponse.Result.UPDATED || updateResponse.getResult() == DocWriteResponse.Result.NOOP) {
@@ -266,6 +293,34 @@ public class EsHighLevelOpt {
         }
 
         return true;
+    }
+
+    public long deleteByQuery() {
+        //参数为索引名，可以不指定，可以一个，可以多个
+        DeleteByQueryRequest request = new DeleteByQueryRequest(STUDENT_INDEX);
+        // 更新时版本冲突
+        request.setConflicts("proceed");
+        // 设置查询条件，第一个参数是字段名，第二个参数是字段的值
+        request.setQuery(new TermQueryBuilder("name", "黄金"));
+        // 更新最大文档数
+        request.setSize(10);
+        // 批次大小
+         request.setBatchSize(1000);
+        // 并行
+        request.setSlices(2);
+        // 使用滚动参数来控制“搜索上下文”存活的时间
+        request.setScroll(TimeValue.timeValueMinutes(10));
+        // 超时
+        request.setTimeout(TimeValue.timeValueMinutes(2));
+        // 刷新索引
+        request.setRefresh(true);
+         try {
+             BulkByScrollResponse response = restHighLevelClient.deleteByQuery(request, RequestOptions.DEFAULT);
+             return response.getStatus().getUpdated();
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
+         return -1L;
     }
 
     /**
@@ -311,6 +366,33 @@ public class EsHighLevelOpt {
         } catch (IOException e) {
             log.error("es add batch data filed", e);
         }
+    }
+    
+    public void updateByQueryRequest() throws IOException {
+        UpdateByQueryRequest request = new UpdateByQueryRequest(STUDENT_INDEX);
+        request.setConflicts("proceed");
+        request.setQuery(new TermQueryBuilder("name", "王"));
+        request.setSize(2);
+        request.setScript(new Script(ScriptType.INLINE,
+                "painless",
+                "if (ctx._source.bankType == 'BOC') {ctx._source.aliasName='hello'}",
+                Collections.emptyMap())
+        );
+        BulkByScrollResponse resp = restHighLevelClient.updateByQuery(request, RequestOptions.DEFAULT);
+        resp.getTotal();
+        resp.getUpdated();
+        resp.getDeleted();
+    }
+
+    public Student get(Long id) {
+        GetRequest gr = new GetRequest(STUDENT_INDEX, id.toString());
+        try {
+            GetResponse response = restHighLevelClient.get(gr, RequestOptions.DEFAULT);
+            return JSON.parseObject(response.getSourceAsBytes(), Student.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -384,12 +466,6 @@ public class EsHighLevelOpt {
                 .must(QueryBuilders.rangeQuery("birthday").lte(new Date(2022 - 1900, 1 - 1, 5, 19, 54, 32).getTime()));
         searchSourceBuilder.query(queryBuilder);
 
-
-
-
-
-
-
         searchSourceBuilder.sort("birthday", SortOrder.ASC);
         searchSourceBuilder.from(0);
         searchSourceBuilder.size(100);
@@ -405,7 +481,7 @@ public class EsHighLevelOpt {
         searchSourceBuilder.highlighter(highlightBuilder);
 
         List<Student> studentList = new ArrayList<>();
-        SearchResponse searchResponse = searchBySearchSourceBuilder("student_index", searchSourceBuilder);
+        SearchResponse searchResponse = searchBySearchSourceBuilder(STUDENT_INDEX, searchSourceBuilder);
         if(searchResponse == null) {
             return studentList;
         }
@@ -466,8 +542,20 @@ public class EsHighLevelOpt {
     // region 模板
     public String createEsTemplate(String templateid){
         Request scriptRequest = new Request("POST", "_scripts/" + templateid);
-        String templateJsonString = Utils.getJsonReader("template.json");
+        String templateJsonString = Utils.getJsonByTemplate("template.json");
         scriptRequest.setJsonEntity(templateJsonString);
+        RestClient restClient = restHighLevelClient.getLowLevelClient();
+        try {
+            Response response = restClient.performRequest(scriptRequest);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return "创建模板成功";
+    }
+
+    public String deleteEsTemplate(String templateid){
+        Request scriptRequest = new Request("DELETE", "_scripts/" + templateid);
         RestClient restClient = restHighLevelClient.getLowLevelClient();
         try {
             Response response = restClient.performRequest(scriptRequest);

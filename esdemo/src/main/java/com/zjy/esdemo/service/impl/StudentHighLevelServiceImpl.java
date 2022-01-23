@@ -33,21 +33,23 @@ public class StudentHighLevelServiceImpl implements StudentHighLevelService {
     private RestHighLevelClient restHighLevelClient;
 
     @Override
-    public void createIndex(String index) {
+    public boolean createIndex(String index) {
         try {
-            esHighLevelOpt.createIndex(index);
+            return esHighLevelOpt.createIndex(index);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     @Override
-    public void deleteIndex(String index) {
+    public boolean deleteIndex(String index) {
         try {
-            esHighLevelOpt.deleteIndex(index);
+            return esHighLevelOpt.deleteIndex(index);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     @Override
@@ -120,6 +122,11 @@ public class StudentHighLevelServiceImpl implements StudentHighLevelService {
     @Override
     public void deleteDoc(String index, String id) {
         esHighLevelOpt.deleteDoc(index, id);
+    }
+
+    @Override
+    public Student get(Long id) {
+        return esHighLevelOpt.get(id);
     }
 
     public List<Student> search() {

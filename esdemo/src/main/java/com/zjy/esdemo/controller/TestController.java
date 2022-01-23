@@ -5,11 +5,11 @@ import com.zjy.esdemo.po.Student;
 import com.zjy.esdemo.service.StudentHighLevelService;
 import com.zjy.esdemo.service.StudentLowLevelService;
 import com.zjy.esdemo.service.StudentService;
+import com.zjy.esdemo.service.impl.Constants;
 import com.zjy.esdemo.service.impl.EsHighLevelOpt;
 import com.zjy.esdemo.service.impl.StudentServiceImpl;
 import com.zjy.esdemo.service.impl.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,9 +34,9 @@ public class TestController {
 
     @RequestMapping("initData")
     public String initData() {
-        String initData = Utils.getJsonReader("initData.json");
+        String initData = Utils.getJsonByTemplate("initData.json");
         List<Student> studentList = JSON.parseArray(initData, Student.class);
-        studentHighLevelService.bulkInsert("student_index", studentList);
+        studentHighLevelService.bulkInsert(Constants.STUDENT_INDEX, studentList);
         return "success";
     }
 
@@ -58,7 +58,11 @@ public class TestController {
     }
 
     @RequestMapping("save")
-    public String save(Student bean) {
+    public String save() {
+        Student bean = new Student();
+        bean.setStudentId(10L);
+        bean.setName("曾军毅");
+        bean.setAge(43);
         studentService.save(bean);
         return "success";
     }
@@ -80,39 +84,49 @@ public class TestController {
 
     // region highlevel
     @RequestMapping("createIndex")
-    public String createIndex(String index) {
-        studentHighLevelService.createIndex(index);
-        return "success";
+    public boolean createIndex(String index) {
+        return studentHighLevelService.createIndex(index);
+//        return studentService.createIndex();
     }
 
     @RequestMapping("deleteIndex")
-    public String deleteIndex(String index) {
-        studentHighLevelService.deleteIndex(index);
-        return "success";
+    public boolean deleteIndex(String index) {
+        return studentHighLevelService.deleteIndex(index);
     }
 
     @RequestMapping("insert")
     public String insert() {
-        studentHighLevelService.insertTestDoc("student_index");
+        studentHighLevelService.insertTestDoc(Constants.STUDENT_INDEX);
         return "success";
     }
 
     @RequestMapping("batchInsertDoc")
     public String batchInsertDoc() {
-        studentHighLevelService.batchInsertTestDoc("student_index");
+        studentHighLevelService.batchInsertTestDoc(Constants.STUDENT_INDEX);
         return "success";
     }
 
     @RequestMapping("update")
     public String update(long id, int age) {
-        studentHighLevelService.update("student_index", id, age);
+        studentHighLevelService.update(Constants.STUDENT_INDEX, id, age);
         return "success";
     }
 
     @RequestMapping("delete")
     public String delete(String id) {
-        studentHighLevelService.deleteDoc("student_index", id);
+        studentHighLevelService.deleteDoc(Constants.STUDENT_INDEX, id);
         return "success";
+    }
+
+    @RequestMapping("deleteByQuery")
+    public String deleteByQuery() {
+        esHighLevelOpt.deleteByQuery();
+        return "success";
+    }
+
+    @RequestMapping("get")
+    public Student get() {
+        return studentHighLevelService.get(5L);
     }
 
     @RequestMapping("search")
@@ -126,12 +140,17 @@ public class TestController {
         ids.add("2");
         ids.add("6");
         ids.add("8");
-        return studentHighLevelService.getList("student_index", ids);
+        return studentHighLevelService.getList(Constants.STUDENT_INDEX, ids);
     }
 
     @RequestMapping("createEsTemplate")
     public String createEsTemplate() {
-        return esHighLevelOpt.createEsTemplate("student_search");
+        return esHighLevelOpt.createEsTemplate(Constants.STUDENT_SEARCH_TEMPLATE);
+    }
+
+    @RequestMapping("deleteEsTemplate")
+    public String deleteEsTemplate() {
+        return esHighLevelOpt.deleteEsTemplate(Constants.STUDENT_SEARCH_TEMPLATE);
     }
 
     @RequestMapping("getEsTemplate")
@@ -140,7 +159,7 @@ public class TestController {
         map.put("name", "王二丫");
         map.put("gt", 20);
         map.put("lt", 40);
-        return esHighLevelOpt.getEsTemplate("student_search", map);
+        return esHighLevelOpt.getEsTemplate(Constants.STUDENT_SEARCH_TEMPLATE, map);
     }
 
     @RequestMapping("searchByTemplate")
@@ -149,7 +168,7 @@ public class TestController {
         map.put("name", "王二丫");
         map.put("gt", 20);
         map.put("lt", 40);
-        List<Map<String, Object>> maps = esHighLevelOpt.useEsTemplate("student_index", "student_search", map);
+        List<Map<String, Object>> maps = esHighLevelOpt.useEsTemplate(Constants.STUDENT_INDEX, Constants.STUDENT_SEARCH_TEMPLATE, map);
         return JSON.toJSONString(maps);
     }
 

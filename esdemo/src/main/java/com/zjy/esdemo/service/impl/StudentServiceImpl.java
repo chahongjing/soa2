@@ -43,7 +43,7 @@ public class StudentServiceImpl implements StudentService {
     @Autowired
     ElasticsearchRestTemplate elasticsearchRestTemplate;
 
-    public void createIndex() throws Exception {
+    public boolean createIndex() {
         // 创建索引
         elasticsearchRestTemplate.indexOps(Student.class).create();
 
@@ -52,6 +52,7 @@ public class StudentServiceImpl implements StudentService {
         boolean brue = elasticsearchRestTemplate.indexOps(Student.class).putMapping(mapping);
         System.out.println(brue);
         System.out.println(mapping);
+        return brue;
     }
 
     @Override
@@ -188,9 +189,16 @@ public class StudentServiceImpl implements StudentService {
         return querySearch(searchQuery);
     }
 
+    /**
+     * must和should混合查询
+     * @param name
+     * @param desc
+     * @param age
+     * @return
+     */
     public List<Student> bool (String name, String desc, Integer age){
         BoolQueryBuilder shouldBuilder = new BoolQueryBuilder();
-        shouldBuilder.should(rangeQuery("age").lt(age).gt(3));
+        shouldBuilder.should(rangeQuery("age").lt(age).gt(3).includeLower(true).includeUpper(true));
 
         Query searchQuery = new NativeSearchQueryBuilder().withQuery(
                 boolQuery().
