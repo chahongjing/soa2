@@ -1,0 +1,43 @@
+{
+  "query":
+  {
+    "bool":
+    {
+      "must":
+      [
+        {
+          "match_phrase":
+          {
+            "name": "a"
+          }
+        },
+        {
+          "term":
+          {
+            "sex": 1
+          }
+        }
+      ],
+      "must_not":
+      [],
+      "should":
+      [
+        {
+          "match_phrase":
+          {
+            "city": "b"
+          }
+        },
+        {
+          "match_phrase":
+          {
+            "city": "c"
+          }
+        }
+      ],
+      "minimum_should_match": 1
+    },
+    "minimum_should_match": 1
+  },
+  "size": 5
+}
