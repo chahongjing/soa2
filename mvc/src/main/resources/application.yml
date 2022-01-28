@@ -1,0 +1,9 @@
+spring:
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+
+server:
+  error:
+    include-exception: true
+    include-message: always

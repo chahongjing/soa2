@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+</head>
+<body>
+<div id="root">
+    <button @click="login">登录</button>
+</div>
+
+<script src="/js/vue.js"></script>
+<script src="/js/axios.min.js"></script>
+<script th:inline="javascript">
+    var vm = new Vue({
+        el: '#root',
+        data () {
+            return {
+
+            }
+        },
+        methods: {
+            login: function() {
+                axios.post('/login').then(function(resp) {
+                    if(resp.status == 200) {
+                        var redirectUrl = [[${redirectUrl}]].replace('\\', '');
+                        if(redirectUrl) {
+                            window.location = redirectUrl;
+                        }
+                    } else {
+                        alert(resp.data)
+                    }
+                })
+            }
+        },
+        mounted: function () {
+
+        }
+    })
+</script>
+</body>
+</html>

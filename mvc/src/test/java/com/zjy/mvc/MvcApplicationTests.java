@@ -1,10 +1,10 @@
-package com.zjy.springbootadmin;
+package com.zjy.mvc;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SpringbootAdminApplicationTests {
+class MvcApplicationTests {
 
     @Test
     void contextLoads() {

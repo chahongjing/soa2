@@ -82,4 +82,8 @@ public class BaseServiceImpl<Dao extends BaseDao<T, S>, T, S> implements BaseSer
         PageHelper.startPage(page.getPageNum(), page.getPageSize()).setOrderBy(page.getOrderBy());
         return new PageBean(this.selectByCondition(example));
     }
+
+    public Dao getDao() {
+        return dao;
+    }
 }

@@ -7,7 +7,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
 <!--        <version>2.2.1.RELEASE</version>-->
-        <version>2.5.3</version>
+        <version>2.6.3</version>
         <relativePath/>
     </parent>
 
@@ -34,6 +34,7 @@
         <module>rocketmq</module>
         <module>javaagent</module>
         <module>webApp</module>
+        <module>mvc</module>
     </modules>
 
     <properties>
@@ -45,7 +46,7 @@
         <dubbo.starter>2.0.0</dubbo.starter>
         <dubbo>2.5.5</dubbo>
         <zkclient>0.11</zkclient>
-        <fastjson>1.2.58</fastjson>
+        <fastjson>1.2.78</fastjson>
         <mybatis-springboot>2.0.0</mybatis-springboot>
         <mysql>8.0.13</mysql>
         <pagehelper-springboot>1.2.10</pagehelper-springboot>
@@ -175,6 +176,7 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>2.3.4.RELEASE</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

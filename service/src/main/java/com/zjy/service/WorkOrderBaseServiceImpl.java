@@ -23,9 +23,6 @@ public class WorkOrderBaseServiceImpl extends BaseServiceImpl<WorkOrderMapper, W
 
     private WorkOrderType workOrderType = WorkOrderType.DEFAULT;
 
-    @Autowired
-    protected WorkOrderMapperExt daoExt;
-
     public WorkOrderType getWorkOrderType() {
         return workOrderType;
     }
@@ -37,7 +34,7 @@ public class WorkOrderBaseServiceImpl extends BaseServiceImpl<WorkOrderMapper, W
     @Override
     public String myBaseMethod() {
         WorkOrder workOrder = super.selectById(1L);
-        Map<String, Long> stringIntegerMap = daoExt.queryRepeatCount(1, "zjy");
+        Map<String, Long> stringIntegerMap = this.getDao().queryRepeatCount(1, "zjy");
         PageInfomation pi = new PageInfomation(1, 10, "id desc");
         WorkOrderCondition woc = new WorkOrderCondition();
         PageBean<? extends WorkOrder> pageBean = super.queryPageList(pi, woc);
