@@ -41,6 +41,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>1.8</java.version>
 
         <junit>4.11</junit>
         <dubbo.starter>2.0.0</dubbo.starter>
@@ -54,10 +55,12 @@
         <kafka-version>2.2.7.RELEASE</kafka-version>
         <redis>2.1.6.RELEASE</redis>
         <project.version>1.0</project.version>
-        <common.lang3>3.9</common.lang3>
+        <common.lang3>3.12.0</common.lang3>
         <common.beanutils>1.9.4</common.beanutils>
         <commons.pool2>2.7.0</commons.pool2>
         <swagger2>2.9.2</swagger2>
+        <shiro-spring>1.8.0</shiro-spring>
+        <sqlite-jdbc>3.27.2.1</sqlite-jdbc>
 
         <maven.compile>3.8.1</maven.compile>
         <maven.surefire>3.0.0-M3</maven.surefire>
@@ -166,6 +169,16 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>2.11.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.shiro</groupId>
+                <artifactId>shiro-spring</artifactId>
+                <version>${shiro-spring}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.xerial</groupId>
+                <artifactId>sqlite-jdbc</artifactId>
+                <version>${sqlite-jdbc}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -1,6 +1,8 @@
 package com.zjy.mvc.contoller;
 
 import com.zjy.mvc.configuration.shiro.ShiroTokenAdmin;
+import com.zjy.mvc.po.UserInfo;
+import com.zjy.mvc.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -9,6 +11,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.util.SavedRequest;
 import org.apache.shiro.web.util.WebUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +24,10 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 @Slf4j
 public class IndexController {
+
+    @Autowired
+    private UserService userService;
+
     @GetMapping("/index")
     @ResponseBody
     public String index() {
@@ -52,6 +59,9 @@ public class IndexController {
     @GetMapping("/testPage")
     @RequiresPermissions({"myPer"})
     public String testPage() {
+        UserInfo fromMaster = userService.getFromMaster();
+        UserInfo fromSlave = userService.getFromSlave();
+
         return "testPage";
     }
 

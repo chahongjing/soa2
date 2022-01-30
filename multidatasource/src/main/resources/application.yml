@@ -8,7 +8,7 @@ spring:
     slave:
       driver-class-name: com.mysql.cj.jdbc.Driver
       password: root
-      jdbcUrl: jdbc:mysql://localhost:3306/salvedb?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      jdbcUrl: jdbc:mysql://localhost:3306/slavedb?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       username: root
 logging:
   level:

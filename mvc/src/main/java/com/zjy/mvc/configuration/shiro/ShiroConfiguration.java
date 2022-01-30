@@ -11,6 +11,7 @@ import org.apache.shiro.session.mgt.eis.SessionDAO;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
+import org.apache.shiro.web.filter.mgt.DefaultFilter;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.servlet.SimpleCookie;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
@@ -45,28 +46,29 @@ public class ShiroConfiguration {
         // 登录成功后要跳转的链接
         shiroFilterFactoryBean.setSuccessUrl("/index");
         // 授权失败后操作
-        shiroFilterFactoryBean.getFilters().put("authc", new CustomFormAuthenticationFilter());
+        shiroFilterFactoryBean.getFilters().put(DefaultFilter.authc.name(), new CustomFormAuthenticationFilter());
         //拦截器.
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         // 配置不会被拦截的链接 顺序判断，因为前端模板采用了thymeleaf，这里不能直接使用 ("/static/**", "anon")来配置匿名访问，必须配置到每个静态目录
         // https://blog.csdn.net/wanliangsoft/article/details/86533754
-        filterChainDefinitionMap.put("/favicon.ico", "anon");
-        filterChainDefinitionMap.put("/user/login**", "anon");
-        filterChainDefinitionMap.put("/user/logout**", "anon");
-        filterChainDefinitionMap.put("/druid/**", "anon");
-        filterChainDefinitionMap.put("/static/**", "anon");
-        filterChainDefinitionMap.put("/comm/getEnums", "anon");
-        filterChainDefinitionMap.put("/tool/getDriverUrlList", "anon");
-        filterChainDefinitionMap.put("/tool/getTableInfo", "anon");
-        filterChainDefinitionMap.put("/echarts/**", "anon");
-        filterChainDefinitionMap.put("/user/loginpage", "anon");
-        filterChainDefinitionMap.put("/learn/angulardemo", "anon");
-        filterChainDefinitionMap.put("/learn/testangluar", "anon");
-        filterChainDefinitionMap.put("/bootstrap/**", "anon");
-        filterChainDefinitionMap.put("/js/**", "anon");
-        filterChainDefinitionMap.put("/403", "anon");
-        filterChainDefinitionMap.put("/logout", "logout");
-        filterChainDefinitionMap.put("/**", "authc");
+        // org.apache.shiro.web.filter.authc;org.apache.shiro.web.filter.authz;org.apache.shiro.web.filter.session
+        filterChainDefinitionMap.put("/favicon.ico", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/user/login**", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/user/logout**", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/druid/**", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/static/**", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/comm/getEnums", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/tool/getDriverUrlList", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/tool/getTableInfo", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/echarts/**", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/user/loginpage", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/learn/angulardemo", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/learn/testangluar", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/bootstrap/**", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/js/**", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/403", DefaultFilter.anon.name());
+        filterChainDefinitionMap.put("/logout", DefaultFilter.logout.name());
+        filterChainDefinitionMap.put("/**", DefaultFilter.authc.name());
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
         return shiroFilterFactoryBean;
     }
