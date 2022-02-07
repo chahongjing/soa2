@@ -38,4 +38,8 @@ public class UserInfo {
      * 名称
      */
     private String userName;
+    /**
+     * 密码
+     */
+    private String password;
 }

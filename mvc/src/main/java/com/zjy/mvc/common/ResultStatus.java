@@ -1,4 +1,4 @@
-package com.zjy.mvc;
+package com.zjy.mvc.common;
 
 public enum ResultStatus implements IBaseEnum {
     OK(1, "成功"),

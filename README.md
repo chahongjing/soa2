@@ -10,7 +10,7 @@
 |javaagent|-|agent的demo，install后执行`java -javaagent:agentTest.jar com.zjy.App`或`java -javaagent:agentTest.jar -jar agentTest.jar`<br>如果是先运行应用程序，则可以使用这些代码附加运行agent`-- 15186表示目标进程的PID；VirtualMachine vm = VirtualMachine.attach("15186");  vm.loadAgent(".../agent.jar");vm.detach();|
 |mp|[【8080】](http://localhost:8080) [【git docs】](https://gitee.com/baomidou/mybatisplus-spring-boot)|mybatis-plus-starter，实体属性枚举|
 |multidatasource|[【8080】](http://localhost:8080)|多数据源，不同数据源走不同的mapper；打war包|
-|mvc|[【8080】](http://localhost:8080)|springboot-mvc, shiro+permission，vue，动态数据源|
+|mvc|[【8080】](http://localhost:8080)|springboot-mvc, shiro+permission，vue，动态数据源，重复请求注解，大数据量下载，mybatis枚举映射|
 |mystater|-|mystarter|
 |rocketmq|-|rocketmq-starter|
 |service|-|引入dao模块，pagehelper-starter,dubbo-starter,durid-starter,cache-starter,redis-starter,zk,kafka<br>启动kafka:<br>1. zookeeper-server-start.bat ../../config/zookeeper.properties<br>2. kafka-server-start.bat ../../config/server.properties|

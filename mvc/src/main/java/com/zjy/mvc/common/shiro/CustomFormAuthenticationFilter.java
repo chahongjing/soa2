@@ -1,8 +1,8 @@
-package com.zjy.mvc.configuration.shiro;
+package com.zjy.mvc.common.shiro;
 
 import com.alibaba.fastjson.JSON;
-import com.zjy.mvc.BaseResult;
-import com.zjy.mvc.ResultStatus;
+import com.zjy.mvc.common.BaseResult;
+import com.zjy.mvc.common.ResultStatus;
 import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
 import org.springframework.http.MediaType;
 

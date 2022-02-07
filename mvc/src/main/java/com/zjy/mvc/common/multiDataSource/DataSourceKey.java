@@ -1,4 +1,4 @@
-package com.zjy.mvc.multiDataSource;
+package com.zjy.mvc.common.multiDataSource;
 
 /**
  * 存数据源key值

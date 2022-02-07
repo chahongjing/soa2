@@ -1,7 +1,9 @@
 package com.zjy.mvc.contoller;
 
-import com.zjy.mvc.configuration.shiro.ShiroTokenAdmin;
+import com.zjy.mvc.po.DownloadTask;
+import com.zjy.mvc.po.TestDownloadRecord;
 import com.zjy.mvc.po.UserInfo;
+import com.zjy.mvc.service.DownlaodTaskService;
 import com.zjy.mvc.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +29,9 @@ public class IndexController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private DownlaodTaskService downlaodTaskService;
 
     @GetMapping("/index")
     @ResponseBody
@@ -69,8 +74,42 @@ public class IndexController {
     @ResponseBody
     public String login() {
         Subject subject = SecurityUtils.getSubject();
-        UsernamePasswordToken token = new ShiroTokenAdmin("zjy", "pass");
+        UsernamePasswordToken token = new UsernamePasswordToken("zjy", "pass");
         subject.login(token);
+        return "abc";
+    }
+
+    @GetMapping("/testDownload")
+    @ResponseBody
+    public String testDownload() {
+        Subject subject = SecurityUtils.getSubject();
+        UsernamePasswordToken token = new UsernamePasswordToken("zjy", "pass");
+        subject.login(token);
+        return "abc";
+    }
+
+    @GetMapping("/testDownloadList")
+    @ResponseBody
+    public String testDownloadList() {
+        DownloadTask task = new DownloadTask();
+        task.setCreatedBy("1");
+        task.setCreatedName("ad");
+        downlaodTaskService.addTask(task);
+        return "abc";
+    }
+
+    @GetMapping("/testCreateDownloadData")
+    @ResponseBody
+    public String testCreateDownloadData() {
+        TestDownloadRecord record;
+        for(int i = 0; i < 100000; i++) {
+            log.info("插入第{}条数据", i);
+            record = new TestDownloadRecord();
+            record.setUserId(String.valueOf(i));
+            record.setUserName("admin" + i);
+            record.setUserCode("" + i);
+            downlaodTaskService.addRecord(record);
+        }
         return "abc";
     }
 }

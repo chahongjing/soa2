@@ -1,4 +1,4 @@
-package com.zjy.mvc;
+package com.zjy.mvc.common;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;

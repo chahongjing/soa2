@@ -1,4 +1,4 @@
-package com.zjy.mvc.multiDataSource;
+package com.zjy.mvc.common.multiDataSource;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 @Slf4j
 public class DynamicDataSourceAspect {
 
-    @Pointcut("@annotation(com.zjy.mvc.multiDataSource.DBSource)")
+    @Pointcut("@annotation(com.zjy.mvc.common.multiDataSource.DBSource)")
     public void pointCut() {
     }
 

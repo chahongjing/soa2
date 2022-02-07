@@ -1,5 +1,6 @@
-package com.zjy.mvc.configuration.shiro;
+package com.zjy.mvc.common.shiro;
 
+import com.zjy.mvc.po.UserInfo;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;

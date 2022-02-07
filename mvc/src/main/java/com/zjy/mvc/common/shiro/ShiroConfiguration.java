@@ -1,5 +1,6 @@
-package com.zjy.mvc.configuration.shiro;
+package com.zjy.mvc.common.shiro;
 
+import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.cache.CacheManager;
@@ -36,7 +37,6 @@ public class ShiroConfiguration {
      */
     @Bean
     public ShiroFilterFactoryBean shirFilter(SecurityManager securityManager) {
-        System.out.println("ShiroConfiguration.shirFilter()");
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
         shiroFilterFactoryBean.setSecurityManager(securityManager);
         // 如果不设置默认会自动寻找Web工程根目录下的"/login.jsp"页面
@@ -119,7 +119,7 @@ public class ShiroConfiguration {
         MyAuthorizingRealm realm = new MyAuthorizingRealm();
         realm.setCredentialsMatcher(credentialsMatcher);
         realm.setCacheManager(cacheManager);
-        realm.setAuthenticationTokenClass(ShiroTokenAdmin.class);
+        realm.setAuthenticationTokenClass(UsernamePasswordToken.class);
         return realm;
     }
 

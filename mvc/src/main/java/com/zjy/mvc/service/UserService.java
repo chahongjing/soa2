@@ -1,7 +1,7 @@
 package com.zjy.mvc.service;
 
 import com.zjy.mvc.dao.UserInfoDao;
-import com.zjy.mvc.multiDataSource.DBSource;
+import com.zjy.mvc.common.multiDataSource.DBSource;
 import com.zjy.mvc.po.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

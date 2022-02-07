@@ -6,20 +6,27 @@ spring:
     master:
       driver-class-name: org.sqlite.JDBC
       password:
-      jdbcUrl: jdbc:sqlite://D:/workspace/code/my/java_ToolSiteMvc4J/web/target/ToolSiteMvc4J/WEB-INF/classes/db/app.db
+      jdbcUrl: jdbc:sqlite://D:/tmp/app.db
       username:
     slave:
       driver-class-name: org.sqlite.JDBC
       password:
-      jdbcUrl: jdbc:sqlite://D:/workspace/code/my/java_ToolSiteMvc4J/web/target/classes/db/app.db
+      jdbcUrl: jdbc:sqlite://D:/tmp/app.db
       username:
     migration:
       driver-class-name: org.sqlite.JDBC
       password:
-      jdbcUrl: jdbc:sqlite://D:/workspace/code/my/java_ToolSiteMvc4J/web/target/classes/db/app.db
+      jdbcUrl: jdbc:sqlite://D:/tmp/app.db
       username:
 
 server:
   error:
     include-exception: true
     include-message: always
+
+pagehelper:
+  helperDialect: sqlite
+
+log:
+  path: d:/tmp/logs
+  level: INFO

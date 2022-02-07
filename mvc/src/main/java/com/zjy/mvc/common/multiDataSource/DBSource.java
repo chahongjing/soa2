@@ -1,4 +1,4 @@
-package com.zjy.mvc.multiDataSource;
+package com.zjy.mvc.common.multiDataSource;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

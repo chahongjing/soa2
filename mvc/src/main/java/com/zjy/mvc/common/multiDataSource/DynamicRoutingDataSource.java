@@ -1,4 +1,4 @@
-package com.zjy.mvc.multiDataSource;
+package com.zjy.mvc.common.multiDataSource;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;

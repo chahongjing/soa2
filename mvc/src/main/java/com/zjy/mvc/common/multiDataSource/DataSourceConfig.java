@@ -1,6 +1,8 @@
-package com.zjy.mvc.multiDataSource;
+package com.zjy.mvc.common.multiDataSource;
 
+import com.zjy.mvc.enums.DownTaskStatus;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -100,21 +102,19 @@ public class DataSourceConfig {
         //此处设置为了解决找不到mapper文件的问题
         try {
             sqlSessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().
-                    getResources("classpath:mapper/*Dao.xml"));
+                    getResources("classpath:mapper/*Mapper.xml"));
             sqlSessionFactoryBean.setConfigLocation(new PathMatchingResourcePatternResolver().getResource("classpath:mybatis-config.xml"));
 //            sqlSessionFactoryBean.setTypeAliasesPackage(DataSourceConfiguration.TYPE_ALIASE);
 //            sqlSessionFactoryBean.setTypeHandlersPackage(DataSourceConfiguration.TYPE_HANDLE_PACKAGE);
 //            sqlSessionFactoryBean.setVfs(SpringBootVFS.class);
-        } catch (IOException e) {
+//            TypeHandlerRegistry typeHandlerRegistry = sqlSessionFactoryBean.getObject().getConfiguration().getTypeHandlerRegistry();
+//            typeHandlerRegistry.register(DownTaskStatus.class, CodeEnumTypeHandler.class);
+            sqlSessionFactoryBean.setTypeHandlersPackage(CodeEnumTypeHandler.class.getPackage().getName());
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return sqlSessionFactoryBean;
     }
-
-//    @Bean("sqlSessionTemplate")
-//    public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactoryBean sqlSessionFactoryBean) throws Exception {
-//        return new SqlSessionTemplate(sqlSessionFactoryBean.getObject());
-//    }
 
     /**
      * 事物管理器
