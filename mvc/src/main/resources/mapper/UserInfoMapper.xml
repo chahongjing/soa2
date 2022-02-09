@@ -10,6 +10,14 @@
         FROM UserInfo
         WHERE UserId = #{id, jdbcType = VARCHAR}
     </select>
+    <select id="getList" resultType="com.zjy.mvc.po.UserInfo">
+        SELECT
+        <include refid="fieldWithPrefix">
+            <property name="tableName" value="UserInfo"/>
+        </include>
+        FROM UserInfo
+        WHERE UserId = #{id, jdbcType = VARCHAR}
+    </select>
     <!-- 带前缀的字段 -->
     <sql id="fieldWithPrefix">
         ${tableName}.UserId, ${tableName}.UserCode, ${tableName}.UserName, ${tableName}.Sex,

@@ -1,7 +1,13 @@
 package com.zjy.mvc.common.multiDataSource;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInterceptor;
+import com.zjy.mvc.common.sql.SqlPrint;
 import com.zjy.mvc.enums.DownTaskStatus;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.logging.nologging.NoLoggingImpl;
+import org.apache.ibatis.logging.stdout.StdOutImpl;
+import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.annotation.MapperScan;
@@ -9,10 +15,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,6 +36,8 @@ import java.util.Map;
 @MapperScan(basePackages = {"com.zjy.mvc.dao"}, sqlSessionFactoryRef = "sqlSessionFactoryBean")
 public class DataSourceConfig {
 
+    @Resource
+    private SqlPrint sqlPrint;
 
     /**
      * 主数据
@@ -103,13 +113,26 @@ public class DataSourceConfig {
         try {
             sqlSessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().
                     getResources("classpath:mapper/*Mapper.xml"));
-            sqlSessionFactoryBean.setConfigLocation(new PathMatchingResourcePatternResolver().getResource("classpath:mybatis-config.xml"));
+//            sqlSessionFactoryBean.setConfigLocation(new PathMatchingResourcePatternResolver().getResource("classpath:mybatis-config.xml"));
+            org.apache.ibatis.session.Configuration configuration = new org.apache.ibatis.session.Configuration();
+//            configuration.setLogImpl(StdOutImpl.class);//标准输出日志
+            configuration.setLogImpl(NoLoggingImpl.class);// 不输出日志（）
+            configuration.setMapUnderscoreToCamelCase(true);// 开启驼峰命名
+            configuration.setLazyLoadingEnabled(false);
+            configuration.setCallSettersOnNulls(true);// 开启在属性为null也调用setter方法
+            sqlSessionFactoryBean.setConfiguration(configuration);
+            if(sqlPrint != null) {
+                sqlSessionFactoryBean.setPlugins(sqlPrint);
+            }
+
 //            sqlSessionFactoryBean.setTypeAliasesPackage(DataSourceConfiguration.TYPE_ALIASE);
 //            sqlSessionFactoryBean.setTypeHandlersPackage(DataSourceConfiguration.TYPE_HANDLE_PACKAGE);
 //            sqlSessionFactoryBean.setVfs(SpringBootVFS.class);
 //            TypeHandlerRegistry typeHandlerRegistry = sqlSessionFactoryBean.getObject().getConfiguration().getTypeHandlerRegistry();
 //            typeHandlerRegistry.register(DownTaskStatus.class, CodeEnumTypeHandler.class);
             sqlSessionFactoryBean.setTypeHandlersPackage(CodeEnumTypeHandler.class.getPackage().getName());
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }

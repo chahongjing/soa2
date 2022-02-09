@@ -10,5 +10,7 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 		<setting name="lazyLoadingEnabled" value="false" />
 		<setting name="mapUnderscoreToCamelCase" value="true" />
 	</settings>
-
+	<plugins>
+		<plugin interceptor="com.zjy.mvc.common.sql.SqlPrint"></plugin>
+	</plugins>
 </configuration>

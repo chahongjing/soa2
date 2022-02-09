@@ -1,5 +1,8 @@
 package com.zjy.mvc.service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.zjy.mvc.common.sql.SqlLog;
 import com.zjy.mvc.dao.UserInfoDao;
 import com.zjy.mvc.common.multiDataSource.DBSource;
 import com.zjy.mvc.po.UserInfo;
@@ -15,8 +18,13 @@ public class UserService {
 
     @DBSource
     public UserInfo getFromMaster() {
-        UserInfo userInfo = userInfoDao.get("1");
-        log.info("user master: {}", userInfo.getUserName());
+        PageHelper.startPage(1, 1);
+        PageInfo<UserInfo> pageInfo = new PageInfo<>(userInfoDao.getList("1"));
+        UserInfo userInfo = null;
+        if(pageInfo.getTotal() > 0) {
+            userInfo = pageInfo.getList().get(0);
+            log.info("user master: {}", userInfo.getUserName());
+        }
         return userInfo;
     }
 

@@ -31,6 +31,9 @@ public class MyAuthorizingRealm extends AuthorizingRealm {
 //        UserInfo user = userInfoSvc.getByUserCode(token.getUsername());
         UserInfo user = new UserInfo();
         user.setUserCode("zjy");
+        if(token.getCredentials() == null) {
+            return null;
+        }
         user.setPassword(this.getMd5Hash(new String((char[])token.getCredentials()), token.getUsername()));
         if (null != user) {
             return new SimpleAuthenticationInfo(user, user.getPassword(), ByteSource.Util.bytes(user.getUserCode()), getName());
