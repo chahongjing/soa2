@@ -1,5 +1,11 @@
 package com.zjy.mvc.contoller;
 
+import com.alibaba.fastjson.JSON;
+import com.zjy.mvc.common.stratory.BaseActionParam;
+import com.zjy.mvc.common.stratory.BaseActionResult;
+import com.zjy.mvc.common.stratory.EventDispatcher;
+import com.zjy.mvc.common.stratory.close.CloseParam;
+import com.zjy.mvc.common.stratory.create.CreateParam;
 import com.zjy.mvc.po.DownloadTask;
 import com.zjy.mvc.po.TestDownloadRecord;
 import com.zjy.mvc.po.UserInfo;
@@ -32,6 +38,9 @@ public class IndexController {
 
     @Autowired
     private DownlaodTaskService downlaodTaskService;
+
+    @Autowired
+    private EventDispatcher eventDispatcher;
 
     @GetMapping("/index")
     @ResponseBody
@@ -110,6 +119,23 @@ public class IndexController {
             record.setUserCode("" + i);
             downlaodTaskService.addRecord(record);
         }
+        return "abc";
+    }
+
+    @GetMapping("/testDisp")
+    @ResponseBody
+    public String testDisp() {
+        BaseActionParam baseActionParam = new CreateParam();
+        ((CreateParam)baseActionParam).setType("1");
+        BaseActionResult baseActionResult = eventDispatcher.fireAction(baseActionParam);
+        log.info("result:{}", JSON.toJSONString(baseActionResult));
+        baseActionParam = new CloseParam();
+        baseActionResult = eventDispatcher.fireAction(baseActionParam);
+        log.info("result:{}", JSON.toJSONString(baseActionResult));
+
+
+        baseActionResult = eventDispatcher.publishEvent(baseActionParam);
+        log.info("result:{}", JSON.toJSONString(baseActionResult));
         return "abc";
     }
 }

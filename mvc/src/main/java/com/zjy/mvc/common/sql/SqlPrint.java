@@ -1,5 +1,6 @@
 package com.zjy.mvc.common.sql;
 
+import com.google.common.base.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
@@ -17,6 +18,7 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j(topic = "sqlPrint")
 @Intercepts({
@@ -40,10 +42,9 @@ public class SqlPrint implements Interceptor {
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
 
-//        Stopwatch stopwatch = Stopwatch.createStarted();
+        Stopwatch stopwatch = Stopwatch.createStarted();
         Object result = invocation.proceed();
-//        long executionTime = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        long executionTime = 0L;
+        long executionTime = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         try {
             logSql(invocation, executionTime);
         } catch (Exception e) {
