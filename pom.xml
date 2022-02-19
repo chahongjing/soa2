@@ -34,7 +34,6 @@
         <module>rocketmq</module>
         <module>javaagent</module>
         <module>webApp</module>
-        <module>mvc</module>
     </modules>
 
     <properties>
