@@ -15,13 +15,13 @@ public class RestAuthenticationAccessDeniedHandler implements AccessDeniedHandle
     @Override
     public void handle(HttpServletRequest httpServletRequest, HttpServletResponse response, AccessDeniedException e) throws IOException, ServletException {
         //登陆状态下，权限不足执行该方法
-        System.out.println("权限不足：" + e.getMessage());
-        response.setStatus(200);
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json; charset=utf-8");
-        PrintWriter printWriter = response.getWriter();
-        String body = ResultJson.failure(ResultCode.FORBIDDEN, e.getMessage()).toString();
-        printWriter.write(body);
-        printWriter.flush();
+//        System.out.println("权限不足：" + e.getMessage());
+//        response.setStatus(200);
+//        response.setCharacterEncoding("UTF-8");
+//        response.setContentType("application/json; charset=utf-8");
+//        PrintWriter printWriter = response.getWriter();
+//        String body = ResultJson.failure(ResultCode.FORBIDDEN, e.getMessage()).toString();
+//        printWriter.write(body);
+//        printWriter.flush();
     }
 }

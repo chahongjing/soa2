@@ -29,13 +29,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService CustomUserDetailsService;
 
-    private final JwtAuthenticationTokenFilter authenticationTokenFilter;
+    private final JWTAuthenticationTokenFilter authenticationTokenFilter;
 
     @Autowired
     public WebSecurityConfig(JwtAuthenticationEntryPoint unauthorizedHandler,
                              @Qualifier("RestAuthenticationAccessDeniedHandler") AccessDeniedHandler accessDeniedHandler,
                              @Qualifier("CustomUserDetailsService") UserDetailsService CustomUserDetailsService,
-                             JwtAuthenticationTokenFilter authenticationTokenFilter) {
+                             JWTAuthenticationTokenFilter authenticationTokenFilter) {
         this.unauthorizedHandler = unauthorizedHandler;
         this.accessDeniedHandler = accessDeniedHandler;
         this.CustomUserDetailsService = CustomUserDetailsService;

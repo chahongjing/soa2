@@ -120,5 +120,5 @@ public class JwtUtils {
         Claims claims = getClaimsFromToken(token);
         claims.put(CLAIM_KEY_CREATED, new Date());
         return generateToken(claims);
-    }}
+    }
 }
