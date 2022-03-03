@@ -29,6 +29,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         List<String> excludeUrls = new ArrayList<>();
         excludeUrls.add("/login");
+        excludeUrls.add("/testPage");
         // 不需要保护的资源路径允许访问
         for (String url : excludeUrls) {
             registry.antMatchers(url).permitAll();

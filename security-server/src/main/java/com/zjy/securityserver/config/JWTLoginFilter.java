@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -18,6 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by echisan on 2018/6/23
@@ -88,25 +91,30 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         cookie = new Cookie(JwtTokenUtils.TOKEN_HEADER, token);
         cookie.setPath("/");
-        cookie.setDomain("localhost:8103");
+        cookie.setDomain("localhost");
         response.addCookie(cookie);
 
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json; charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_OK);
-        String reason = "登录成功";
-        response.getWriter().write(new ObjectMapper().writeValueAsString(reason));
-        response.flushBuffer();
+        String redirectUrl = request.getParameter("redirectUrl");
+        if(StringUtils.isEmpty(redirectUrl)) {
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/json; charset=utf-8");
+            response.setStatus(HttpServletResponse.SC_OK);
+            String reason = "登录成功";
+            response.getWriter().write(new ObjectMapper().writeValueAsString(reason));
+            response.flushBuffer();
+        } else {
+            response.sendRedirect(redirectUrl);
+        }
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        response.getWriter().write("authentication failed, reason: " + failed.getMessage());
-
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json; charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        String reason = "登录失败：" + failed.getMessage();
-        response.getWriter().write(new ObjectMapper().writeValueAsString(reason));
+        response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
+
+        Map<String, String> result = new HashMap<>();
+        result.put("msg", "登录失败：" + failed.getMessage());
+        response.getWriter().write(new ObjectMapper().writeValueAsString(result));
     }
 }

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="root">
+    <span v-text="msg"></span>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script th:inline="javascript">
+    var vm = new Vue({
+        el: '#root',
+        data () {
+            return {
+                msg:''
+            }
+        },
+        methods: {
+            init: function() {
+                var me = this;
+                axios.get('/testAjax').then(function(resp) {
+                    if(resp.status == 200) {
+                        me.msg = resp.data;
+                    } else {
+                        alert(resp.data)
+                    }
+                }).catch(function(err) {
+                    if(err.response.status === 403) {
+                        window.location = err.response.data.data + "?redirectUrl=" + encodeURIComponent(window.location.href)
+                    }
+                });
+            }
+        },
+        mounted: function () {
+            this.init();
+        }
+    })
+</script>
+</body>
+</html>

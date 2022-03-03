@@ -16,13 +16,13 @@ public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
         response.setHeader("token", null);
         Cookie cookie = new Cookie(JwtTokenUtils.TOKEN_HEADER, null);
         cookie.setPath("/");
-        cookie.setMaxAge(1);
+        cookie.setMaxAge(0);
         response.addCookie(cookie);
 
         cookie = new Cookie(JwtTokenUtils.TOKEN_HEADER, null);
         cookie.setPath("/");
-        cookie.setMaxAge(1);
-        cookie.setDomain("localhost:8103");
+        cookie.setMaxAge(0);
+        cookie.setDomain("localhost");
         response.addCookie(cookie);
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json; charset=utf-8");

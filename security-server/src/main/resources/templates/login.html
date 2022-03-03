@@ -9,6 +9,7 @@
     <input v-model="username" placeholder="username" autofocus/>
     <input v-model="password" placeholder="password"/>
     <button @click="login">登录</button>
+    <button @click="logout">注销</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
@@ -26,12 +27,36 @@
             login: function() {
                 var param  = {username: this.username, password: this.password}
                 axios.post('/auth/login', param).then(function(resp) {
-                    if(resp.status == 200) {
-                        // var redirectUrl = [[${redirectUrl}]].replace('\\', '');
-                        // if(redirectUrl) {
-                        //     window.location = redirectUrl;
-                        // }
+                    if(resp.status === 200) {
+                        var redirectUrl = ''
+                        if(window.location.search) {
+                            var arr = window.location.search.substr(1).split("&");
+                            for(var i in arr) {
+                                var item = arr[i];
+                                var kv = arr[i].split('=');
+                                if(kv[0] === 'redirectUrl') {
+                                    redirectUrl = decodeURIComponent(kv[1]);
+                                    break;
+                                }
+                            }
+                        }
+                        if(redirectUrl) {
+                            window.location = redirectUrl;
+                        } else {
+                            alert('没有重定向地址');
+                        }
                     } else {
+                        alert(resp.data)
+                    }
+                }).catch(function(err) {
+                    if(err.response.status === 406) {
+                        alert(err.response.data.msg)
+                    }
+                });
+            },
+            logout: function() {
+                axios.get('/logout').then(function(resp) {
+                    if(resp.status === 200) {
                         alert(resp.data)
                     }
                 })
