@@ -35,9 +35,10 @@
         <module>javaagent</module>
         <module>webApp</module>
         <module>jwt</module>
-        <module>security-common</module>
-        <module>security-server</module>
-        <module>security-client</module>
+        <module>mongodb</module>
+        <module>security/security-common</module>
+        <module>security/security-server</module>
+        <module>security/security-client</module>
     </modules>
 
     <properties>
