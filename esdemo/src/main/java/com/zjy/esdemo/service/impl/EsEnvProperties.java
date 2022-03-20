@@ -69,11 +69,11 @@ public class EsEnvProperties {
 
     /**
      * restClient
-     * @param restHighLevelClient
      * @return
      */
     @Bean
-    public RestClient restClient(@Autowired RestHighLevelClient restHighLevelClient) {
-        return restHighLevelClient.getLowLevelClient();
+    public RestClient restClient() {
+        return RestClient.builder(new HttpHost(host, port, protocol)).build();
+//        return restHighLevelClient.getLowLevelClient();
     }
 }

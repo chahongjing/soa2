@@ -48,6 +48,7 @@ import org.elasticsearch.script.mustache.SearchTemplateResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
@@ -245,6 +246,19 @@ public class EsHighLevelOpt {
         return true;
     }
 
+    public boolean docExists(String index, String id) {
+        GetRequest gr = new GetRequest(index, id);
+        boolean exists = false;
+        try {
+            gr.fetchSourceContext(new FetchSourceContext(false));
+            gr.storedFields("_none_");
+            exists = restHighLevelClient.exists(gr, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return exists;
+    }
+
     public boolean updateDoc(String index, String id, int age) {
         Map<String, Object> map = new HashMap<>();
         map.put("age", age);
@@ -331,23 +345,20 @@ public class EsHighLevelOpt {
      */
     public BulkResponse bulkInsert(String index, List<Student> list) {
         BulkRequest bulkRequest = new BulkRequest();
+        BulkResponse bulkResponse = null;
         try {
-        for (Student student : list) {
-            IndexRequest indexRequest = new IndexRequest(index);
-            indexRequest.id(student.getStudentId().toString()).source(XContentFactory.jsonBuilder().value(objectToJSONObject(student)));
-//            indexRequest.id(String.valueOf(bulk.getId())).source(bulk.toString(), XContentType.JSON);
-            bulkRequest.add(indexRequest); // 加入到批量请求bulk
-        }
+            for (Student student : list) {
+                IndexRequest indexRequest = new IndexRequest(index);
+                indexRequest.id(student.getStudentId().toString()).source(XContentFactory.jsonBuilder().value(objectToJSONObject(student)));
+                //            indexRequest.id(String.valueOf(bulk.getId())).source(bulk.toString(), XContentType.JSON);
+                bulkRequest.add(indexRequest); // 加入到批量请求bulk
+            }
+            bulkResponse = restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+            boolean b = bulkResponse.hasFailures();
         } catch (IOException e) {
             e.printStackTrace();
         }
-         BulkResponse bulkResponse = null;
-         try {
-             bulkResponse = restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
-         } catch (IOException e) {
-             e.printStackTrace();
-         }
-         return bulkResponse;
+        return bulkResponse;
     }
 
     /**
