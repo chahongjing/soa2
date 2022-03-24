@@ -1,0 +1,76 @@
+{
+  "query":
+  {
+    "bool":
+    {
+      "must":
+      [
+        {
+          "bool":
+          {
+            "should":
+            [
+              {
+                "match":
+                {
+                  "orgId": "biz_1jact1nne7v71sznrg5y5zl8u"
+                }
+              },
+              {
+                "match":
+                {
+                  "orgIdPath": 240
+                }
+              }
+            ]
+          }
+        },
+        {
+          "bool":
+          {
+            "should":
+            [
+              {
+                "match":
+                {
+                  "type": "gov_complaint"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "must_not":
+      []
+    }
+  }
+}
+
+
+{
+  "query": {
+    "prefix": {
+      "postcode": {
+        "value": "511"
+      }
+    }
+  }
+}
+
+{
+  "query": {
+    "match_phrase_prefix": {
+      "title": "Elasticsearch q"
+    }
+  }
+}
+{
+  "query": {
+    "match_phrase_prefix": {
+      "postcode": {
+        "query": "Elasticsearch q",
+        "max_expansions": 50
+      }
+    }
+  }
+}
