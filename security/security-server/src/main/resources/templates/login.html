@@ -26,7 +26,10 @@
         methods: {
             login: function() {
                 var param  = {username: this.username, password: this.password}
-                axios.post('/auth/login', param).then(function(resp) {
+                var formData = new FormData();
+                formData.append("username", this.username)
+                formData.append("password", this.password)
+                axios.post('/login', formData).then(function(resp) {
                     if(resp.status === 200) {
                         var redirectUrl = ''
                         if(window.location.search) {

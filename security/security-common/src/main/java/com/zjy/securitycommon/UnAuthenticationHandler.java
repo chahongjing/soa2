@@ -3,6 +3,7 @@ package com.zjy.securitycommon;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,11 +12,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by echisan on 2018/6/24
+ * 用户未登录，访问需要登录的页面时会进入此方法
  *
  * @description:没有携带token或者token无效
  */
-public class JWTAuthenticationEntryPoint implements AuthenticationEntryPoint {
+@Component
+public class UnAuthenticationHandler implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,

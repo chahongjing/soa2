@@ -1,4 +1,4 @@
-package com.zjy.securityserver.config;
+package com.zjy.securitycommon;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

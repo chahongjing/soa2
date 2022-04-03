@@ -1,12 +1,8 @@
 package com.zjy.securitycommon;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,6 +17,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     protected BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Autowired
+    protected LoginSuccessHandler loginSuccessHandler;
+    @Autowired
+    protected LoginFailureHandler loginFailureHandler;
+    @Autowired
+    protected LogoutSuccessHandler logoutSuccessHandler;
+    @Autowired
+    protected UnAuthorizationHandler unAuthorizationHandler;
+    @Autowired
+    protected UnAuthenticationHandler unAuthenticationHandler;
+
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
@@ -29,6 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         List<String> excludeUrls = new ArrayList<>();
         excludeUrls.add("/login");
+        excludeUrls.add("/login1");
         excludeUrls.add("/testPage");
         // 不需要保护的资源路径允许访问
         for (String url : excludeUrls) {
@@ -40,10 +48,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 其他任何请求都需要身份认证
         registry.and()
                 .formLogin()
+                // 指定登录页面(GET)及登录地址(表单POST)
                 .loginPage("/login")
+                .usernameParameter("username")
+                .passwordParameter("password")
+                // 登录成功后调用方法
+                .successHandler(loginSuccessHandler)
+                // 登录失败后调用方法
+                .failureHandler(loginFailureHandler)
+                .permitAll()
                 .and()
                 .logout()
-                .logoutSuccessHandler(new MyLogoutSuccessHandler())
+                .logoutSuccessHandler(logoutSuccessHandler)
                 .and()
                 .authorizeRequests()
                 .anyRequest()
@@ -57,15 +73,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 自定义权限拒绝处理类
                 .and()
                 .exceptionHandling()
-                .accessDeniedHandler(new JWTAccessDeniedHandler())
-                .authenticationEntryPoint(new JWTAuthenticationEntryPoint())
+                .accessDeniedHandler(unAuthorizationHandler)
+                .authenticationEntryPoint(unAuthenticationHandler)
                 .and()
-                .addFilter(new JwtAuthenticationTokenFilter(authenticationManager()));
-    }
-
-    @Bean
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+                .addFilter(new AuthenticationTokenFilter(authenticationManager()));
     }
 }
