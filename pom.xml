@@ -50,7 +50,7 @@
         <dubbo.starter>2.0.0</dubbo.starter>
         <dubbo>2.5.5</dubbo>
         <zkclient>0.11</zkclient>
-        <fastjson>1.2.78</fastjson>
+        <fastjson>1.2.83</fastjson>
         <mybatis-springboot>2.2.2</mybatis-springboot>
         <mysql>8.0.13</mysql>
         <pagehelper-springboot>1.4.1</pagehelper-springboot>
