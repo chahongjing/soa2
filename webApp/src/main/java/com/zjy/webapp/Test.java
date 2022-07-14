@@ -1,4 +1,4 @@
-package com.mi.info.kbs.service.exam;
+package com.zjy.webapp;
 
 import lombok.Getter;
 import lombok.Setter;

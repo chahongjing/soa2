@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zjy.esdemo.po.Student;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.indices.alias.Alias;
@@ -20,12 +21,14 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.*;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.cluster.metadata.AliasMetadata;
+import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.ByteSizeUnit;
@@ -34,6 +37,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.core.TimeValue;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -45,12 +49,14 @@ import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.script.mustache.SearchTemplateRequest;
 import org.elasticsearch.script.mustache.SearchTemplateResponse;
+import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -60,6 +66,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.zjy.esdemo.service.impl.Constants.STUDENT_INDEX;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
@@ -481,6 +488,8 @@ public class EsHighLevelOpt {
         searchSourceBuilder.from(0);
         searchSourceBuilder.size(100);
         searchSourceBuilder.timeout(new TimeValue(10, TimeUnit.SECONDS));
+        // 会返回所有命中的条数，默认只会返回10000
+        searchSourceBuilder.trackTotalHits(true);
 
         HighlightBuilder highlightBuilder = new HighlightBuilder();
         highlightBuilder.field(new HighlightBuilder.Field("name"));
@@ -547,6 +556,71 @@ public class EsHighLevelOpt {
         response.getHits().forEach(hi -> {
             System.out.println(hi.getSourceAsString());
         });
+    }
+
+    public List<Long> fetchAllId(String indexName) {
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().filter(QueryBuilders.termQuery("region", 1));
+        queryBuilder.filter(QueryBuilders.termsQuery("type", Arrays.asList(1, 2, 3, 4)));
+        List<Long> idList = new ArrayList<>(50000);
+        int pageSize = 10000;
+        SearchRequest request = new SearchRequest(indexName);
+
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        request.source(builder);
+        builder.query(queryBuilder);
+        builder.size(pageSize);
+        builder.fetchSource(new String[]{"id"}, Strings.EMPTY_ARRAY);
+        builder.sort(SortBuilders.fieldSort("create_time").order(SortOrder.ASC));
+        builder.sort(SortBuilders.fieldSort("update_time").order(SortOrder.ASC));
+
+        Scroll scroll = new Scroll(TimeValue.timeValueMinutes(2L));
+        request.scroll(scroll);
+
+        SearchResponse response = null;
+        int count = 1;
+        try {
+            log.info("scroll param: {}", builder.toString());
+            response = restHighLevelClient.search(request, RequestOptions.DEFAULT);
+            log.info("begin fetch. {}", count);
+        } catch (IOException e) {
+            log.error("查询es出错", e);
+        }
+        if(response == null) {
+            return idList;
+        }
+        SearchHits hits = response.getHits();
+        //记录要滚动的ID
+        String scrollId = response.getScrollId();
+        SearchHit[] hitsScroll = hits.getHits();
+        while (hitsScroll != null && hitsScroll.length > 0 ) {
+            // 有数据，添加到结果中
+            idList.addAll(Stream.of(hitsScroll).map(hit -> {
+                Student entry = JSON.parseObject(hit.getSourceAsString(), Student.class);
+                return entry.getStudentId();
+            }).collect(Collectors.toList()));
+
+            // 再构造滚动查询条件，进行下一次查询
+            SearchScrollRequest searchScrollRequest = new SearchScrollRequest(scrollId);
+            searchScrollRequest.scroll(scroll);
+            try {
+                //响应必须是上面的响应对象，需要对上一层进行覆盖
+                response = restHighLevelClient.scroll(searchScrollRequest, RequestOptions.DEFAULT);
+            } catch (IOException e) {
+                log.error("滚动查询失败", e);
+            }
+            if(response == null) {
+                return idList;
+            }
+            scrollId = response.getScrollId();
+            hits = response.getHits();
+            hitsScroll = hits.getHits();
+            if(hitsScroll != null && hitsScroll.length > 0) {
+                count++;
+                log.info("next fetch. {}", count);
+            }
+        }
+        log.info("fetch es done. {}", count);
+        return idList;
     }
     // endregion
 
