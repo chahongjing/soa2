@@ -52,7 +52,7 @@
         <zkclient>0.11</zkclient>
         <fastjson>1.2.78</fastjson>
         <mybatis-springboot>2.2.2</mybatis-springboot>
-        <mysql>8.0.13</mysql>
+        <mysql>8.0.28</mysql>
         <pagehelper-springboot>1.4.1</pagehelper-springboot>
         <druid-springboot>1.1.16</druid-springboot>
         <kafka-version>2.2.7.RELEASE</kafka-version>
