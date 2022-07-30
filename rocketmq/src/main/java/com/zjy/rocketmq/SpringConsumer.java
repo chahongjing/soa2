@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RocketMQMessageListener(topic = "${rocketmq.producer.topic}", consumerGroup = "${rocketmq.producer.group}")
+//@RocketMQMessageListener(topic = "${rocketmq.producer.topic}", consumerGroup = "${rocketmq.producer.group}",
+//        selectorExpression = "${kfs.rocketmq.org-update.tag}")
 public class SpringConsumer implements RocketMQListener<String> {
     @Override
     public void onMessage(String msg) {
