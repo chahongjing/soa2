@@ -109,6 +109,7 @@ public class StudentHighLevelServiceImpl implements StudentHighLevelService {
         student = new Student(8L, "白银", 34, new ArrayList<>(), new Date(2022 - 1900, Calendar.APRIL, 27, 6, 29, 41));
         student.setAddress(address);
         student.setInterests(interests);
+        student.setNameCompletion("java开发");
         list.add(student);
         esHighLevelOpt.bulkInsert(index, list);
 //        esUtils.bulkIndex(index, list);

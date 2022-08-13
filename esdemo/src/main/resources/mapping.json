@@ -9,6 +9,9 @@
     "name": {
       "type": "keyword"
     },
+    "name_completion": {
+      "type": "completion"
+    },
     "desc": {
       "type": "text"
     },

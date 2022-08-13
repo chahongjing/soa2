@@ -172,7 +172,10 @@ public class TestController {
         return JSON.toJSONString(maps);
     }
 
-
+    @RequestMapping("suggest")
+    public List<String> suggest(String keyword) {
+        return esHighLevelOpt.suggest(Constants.STUDENT_INDEX, keyword);
+    }
     // endregion
 
     // region lowlevel

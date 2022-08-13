@@ -1,5 +1,8 @@
 package com.zjy.esdemo.po;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -8,6 +11,8 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.util.Date;
 import java.util.List;
 
+@Getter
+@Setter
 @Document(indexName = "student_index")
 public class Student {
     @Id
@@ -16,6 +21,10 @@ public class Student {
 
     @Field(type = FieldType.Keyword)
     private String name;
+
+    @Field("name_completion")
+    @JSONField(name = "name_completion")
+    private String nameCompletion;
 
     @Field(type = FieldType.Keyword)
     private String desc;
@@ -45,70 +54,6 @@ public class Student {
         this.age = age;
         this.scores = scores;
         this.birthday = birthday;
-    }
-
-    public Long getStudentId() {
-        return studentId;
-    }
-
-    public void setStudentId(Long studentId) {
-        this.studentId = studentId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Integer getAge() {
-        return age;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
-    }
-
-    public List<Double> getScores() {
-        return scores;
-    }
-
-    public void setScores(List<Double> scores) {
-        this.scores = scores;
-    }
-
-    public Date getBirthday() {
-        return this.birthday;
-    }
-
-    public void setBirthday(Date birthday) {
-        this.birthday = birthday;
-    }
-
-    public Address getAddress() {
-        return address;
-    }
-
-    public void setAddress(Address address) {
-        this.address = address;
-    }
-
-    public List<Interest> getInterests() {
-        return interests;
-    }
-
-    public void setInterests(List<Interest> interests) {
-        this.interests = interests;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public void setDesc(String desc) {
-        this.desc = desc;
     }
 
     @Override

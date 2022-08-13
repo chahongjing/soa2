@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zjy.esdemo.po.Student;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.indices.alias.Alias;
@@ -33,10 +32,17 @@ import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.core.TimeValue;
+import org.elasticsearch.index.mapper.CompletionFieldMapper;
+import org.elasticsearch.index.mapper.KeywordFieldMapper;
+import org.elasticsearch.index.mapper.NestedObjectMapper;
+import org.elasticsearch.index.mapper.NumberFieldMapper;
+import org.elasticsearch.index.mapper.ObjectMapper;
+import org.elasticsearch.index.mapper.TextFieldMapper;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -58,6 +64,10 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -99,61 +109,65 @@ public class EsHighLevelOpt {
         builder.startObject(); {
             builder.startObject("properties"); {
                 builder.startObject("_class"); {
-                    builder.field("type", "keyword");
+                    builder.field("type", KeywordFieldMapper.CONTENT_TYPE);
                 }
                 builder.endObject();
                 builder.startObject("studentId"); {
-                    builder.field("type", "keyword");
+                    builder.field("type", KeywordFieldMapper.CONTENT_TYPE);
                 }
                 builder.endObject();
                 builder.startObject("name"); {
-                    builder.field("type", "keyword");
+                    builder.field("type", KeywordFieldMapper.CONTENT_TYPE);
+                }
+                builder.endObject();
+                builder.startObject("name_completion"); {
+                    builder.field("type", CompletionFieldMapper.CONTENT_TYPE);
                 }
                 builder.endObject();
                 builder.startObject("desc"); {
-                    builder.field("type", "text");
+                    builder.field("type", TextFieldMapper.CONTENT_TYPE);
 //                            .field("analyzer", "ik_smart")
 //                            .field("search_analyzer", "ik_max_word");
                 }
                 builder.endObject();
                 builder.startObject("age"); {
-                    builder.field("type", "integer");
+                    builder.field("type", NumberFieldMapper.NumberType.INTEGER.typeName());
                 }
                 builder.endObject();
                 builder.startObject("scores"); {
-                    builder.field("type", "double");
+                    builder.field("type", NumberFieldMapper.NumberType.DOUBLE.typeName());
 //                            field("analyzer", "ik_smart").
 //                            field("search_analyzer", "ik_max_word");
                 }
                 builder.endObject();
                 builder.startObject("birthday"); {
-                    builder.field("type", "long");
+                    builder.field("type", NumberFieldMapper.NumberType.LONG.typeName());
                 }
                 builder.endObject();
                 builder.startObject("address"); {
-                    builder.field("type", "object");
+                    builder.field("type", ObjectMapper.CONTENT_TYPE);
 
                     builder.startObject("properties");
                     {
                         builder.startObject("_class");
                         {
-                            builder.field("type", "keyword");
+                            builder.field("type", KeywordFieldMapper.CONTENT_TYPE);
                         }
                         builder.endObject();
 
                         builder.startObject("province");
                         {
-                            builder.field("type", "keyword");
+                            builder.field("type", KeywordFieldMapper.CONTENT_TYPE);
                         }
                         builder.endObject();
                         builder.startObject("city");
                         {
-                            builder.field("type", "keyword");
+                            builder.field("type", KeywordFieldMapper.CONTENT_TYPE);
                         }
                         builder.endObject();
                         builder.startObject("area");
                         {
-                            builder.field("type", "keyword");
+                            builder.field("type", KeywordFieldMapper.CONTENT_TYPE);
                         }
                         builder.endObject();
                     }
@@ -161,22 +175,22 @@ public class EsHighLevelOpt {
                 }
                 builder.endObject();
                 builder.startObject("interests"); {
-                    builder.field("type", "nested");
+                    builder.field("type", NestedObjectMapper.CONTENT_TYPE);
                     builder.startObject("properties");
                     {
                         builder.startObject("_class");
                         {
-                            builder.field("type", "keyword");
+                            builder.field("type", KeywordFieldMapper.CONTENT_TYPE);
                         }
                         builder.endObject();
                         builder.startObject("code");
                         {
-                            builder.field("type", "keyword");
+                            builder.field("type", KeywordFieldMapper.CONTENT_TYPE);
                         }
                         builder.endObject();
                         builder.startObject("name");
                         {
-                            builder.field("type", "keyword");
+                            builder.field("type", KeywordFieldMapper.CONTENT_TYPE);
                         }
                         builder.endObject();
                     }
@@ -187,8 +201,8 @@ public class EsHighLevelOpt {
             builder.endObject();
         }
         builder.endObject();
-//        cir.mapping(builder);
-        cir.mapping(Utils.getJsonByTemplate("mapping.json"), XContentType.JSON);
+        cir.mapping(builder);
+//        cir.mapping(Utils.getJsonByTemplate("mapping.json"), XContentType.JSON);
         log.info("mapping:{}", JSON.toJSONString(builder));
         return restHighLevelClient.indices().create(cir, RequestOptions.DEFAULT).isAcknowledged();
     }
@@ -621,6 +635,34 @@ public class EsHighLevelOpt {
         }
         log.info("fetch es done. {}", count);
         return idList;
+    }
+
+    // 智能提示
+    public List<String> suggest(String indexName, String keyword) {
+        CompletionSuggestionBuilder csb = SuggestBuilders.completionSuggestion("name_completion")
+                .prefix(keyword, Fuzziness.ONE).skipDuplicates(true).size(10);
+                //.analyzer("ik_max_word");
+        SuggestBuilder suggestBuilder = new SuggestBuilder();
+        String suggestName = "justASuggestName";
+        suggestBuilder.addSuggestion(suggestName, csb);
+        SearchRequest request = new SearchRequest(indexName).source(new SearchSourceBuilder().suggest(suggestBuilder));
+        SearchResponse response;
+        try {
+            log.info("es search param: {}", request.source().toString());
+            response = restHighLevelClient.search(request, RequestOptions.DEFAULT);
+            Suggest.Suggestion<? extends Suggest.Suggestion.Entry<? extends Suggest.Suggestion.Entry.Option>> suggest
+                    = response.getSuggest().getSuggestion(suggestName);
+            //处理返回
+            List<? extends Suggest.Suggestion.Entry.Option> options = suggest.getEntries().stream().map(Suggest.Suggestion.Entry::getOptions).findFirst().orElse(new ArrayList<>());
+            List<String> result = new ArrayList<>();
+            for (Suggest.Suggestion.Entry.Option option : options) {
+                result.add(option.getText().toString());
+            }
+            return result;
+        } catch (IOException e) {
+            log.error("es search error", e);
+        }
+        return new ArrayList<>();
     }
     // endregion
 
