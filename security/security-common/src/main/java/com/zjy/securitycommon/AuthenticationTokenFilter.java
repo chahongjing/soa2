@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 将用户的登录信息放到上下文中
+ * 将用户的登录信息放到上下文中，UsernamePasswordAuthenticationFilter
  */
 public class AuthenticationTokenFilter extends BasicAuthenticationFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationTokenFilter.class);

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zjy.esdemo.po.Student;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.lucene.queryparser.classic.QueryParserBase;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.indices.alias.Alias;
@@ -24,6 +25,8 @@ import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.*;
+import org.elasticsearch.client.indices.AnalyzeRequest;
+import org.elasticsearch.client.indices.AnalyzeResponse;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.cluster.metadata.AliasMetadata;
@@ -492,8 +495,9 @@ public class EsHighLevelOpt {
     public List<Student> mulitSearch() {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
+
         QueryBuilder queryBuilder = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termQuery("name", "王"))
+                .must(QueryBuilders.termQuery("name", QueryParserBase.escape("王")))
                 .must(QueryBuilders.rangeQuery("birthday").gte(new Date(2022 - 1900, 1 - 1, 4, 8, 24, 45).getTime()))
                 .must(QueryBuilders.rangeQuery("birthday").lte(new Date(2022 - 1900, 1 - 1, 5, 19, 54, 32).getTime()));
         searchSourceBuilder.query(queryBuilder);
@@ -637,6 +641,33 @@ public class EsHighLevelOpt {
         return idList;
     }
 
+    public void testSearchAfter(String indexName) throws IOException {
+        SearchRequest searchRequest = new SearchRequest(indexName);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        //排序条件
+        searchSourceBuilder.sort("id", SortOrder.ASC);
+        searchSourceBuilder.sort("publishTime", SortOrder.DESC);
+        //分页查询
+        searchSourceBuilder.size(2);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse search = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+        SearchHit[] hits = search.getHits().getHits();
+        //序列化为对象
+        //分页查询下一页数据
+        log.info("=====================下一页============================");
+        SearchRequest searchRequest2 = new SearchRequest(indexName);
+        SearchSourceBuilder searchSourceBuilder2 = new SearchSourceBuilder();
+        //排序条件
+        searchSourceBuilder2.sort("id", SortOrder.ASC);
+        searchSourceBuilder2.sort("publishTime", SortOrder.DESC);
+
+        //存储上一次分页的sort信息
+        searchSourceBuilder2.searchAfter(hits[hits.length - 1].getSortValues());
+        searchSourceBuilder2.size(2);
+        searchRequest2.source(searchSourceBuilder2);
+        search = restHighLevelClient.search(searchRequest2, RequestOptions.DEFAULT);
+    }
+
     // 智能提示
     public List<String> suggest(String indexName, String keyword) {
         CompletionSuggestionBuilder csb = SuggestBuilders.completionSuggestion("name_completion")
@@ -663,6 +694,28 @@ public class EsHighLevelOpt {
             log.error("es search error", e);
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * 使用分词器对搜索内容进行分词
+     * @param index
+     * @param keyword
+     * @return
+     */
+    public List<String> splitWord(String index, String keyword) {
+        AnalyzeRequest request = AnalyzeRequest.withIndexAnalyzer(index, "ik-max-word", keyword);
+        AnalyzeResponse response;
+
+        List<String> result = new ArrayList<>();
+        try {
+            response = restHighLevelClient.indices().analyze(request, RequestOptions.DEFAULT);
+            for (AnalyzeResponse.AnalyzeToken token : response.getTokens()) {
+                result.add(token.getTerm());
+            }
+        } catch (IOException e) {
+            log.error("es Analyze failed!", e);
+        }
+        return result;
     }
     // endregion
 

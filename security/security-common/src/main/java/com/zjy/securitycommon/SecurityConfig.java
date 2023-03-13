@@ -76,6 +76,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .accessDeniedHandler(unAuthorizationHandler)
                 .authenticationEntryPoint(unAuthenticationHandler)
                 .and()
-                .addFilter(new AuthenticationTokenFilter(authenticationManager()));
+                .addFilter(new AuthenticationTokenFilter(authenticationManager())) // UsernamePasswordAuthenticationFilter
+//                .httpBasic()  开启http basic验证，会创建BasicAuthenticationFilter拦截器
+        ;
     }
 }
