@@ -7,9 +7,16 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 //@EnableWebSecurity
 //@EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -34,17 +41,37 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry = httpSecurity
                 .authorizeRequests();
 
+//        Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = applicationContext.getBean(RequestMappingHandlerMapping.class).getHandlerMethods();
+//        Set<String> anonymousUrls = new HashSet<>();
+//        for (Map.Entry<RequestMappingInfo, HandlerMethod> infoEntry : handlerMethodMap.entrySet()) {
+//            HandlerMethod handlerMethod = infoEntry.getValue();
+//            AnonymousAccess anonymousAccess = handlerMethod.getMethodAnnotation(AnonymousAccess.class);
+//            if (null != anonymousAccess) {
+//                anonymousUrls.addAll(infoEntry.getKey().getPatternsCondition().getPatterns());
+//            }
+//        }
+
         List<String> excludeUrls = new ArrayList<>();
         excludeUrls.add("/login");
         excludeUrls.add("/login1");
         excludeUrls.add("/testPage");
         // 不需要保护的资源路径允许访问
-        for (String url : excludeUrls) {
-            registry.antMatchers(url).permitAll();
-        }
+//        for (String url : excludeUrls) {
+//            registry.antMatchers(url).permitAll();
+//        }
+        registry.antMatchers(excludeUrls.toArray(new String[0])).permitAll();
         // 允许跨域的OPTIONS请求
         registry.antMatchers(HttpMethod.OPTIONS)
                 .permitAll();
+//        // 静态资源等等
+//        registry.antMatchers(
+//                HttpMethod.GET,
+//                "/*.html",
+//                "/**/*.html",
+//                "/**/*.css",
+//                "/**/*.js",
+//                "/webSocket/**"
+//        ).permitAll();
         // 其他任何请求都需要身份认证
         registry.and()
                 .formLogin()
@@ -76,7 +103,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .accessDeniedHandler(unAuthorizationHandler)
                 .authenticationEntryPoint(unAuthenticationHandler)
                 .and()
+//                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilter(new AuthenticationTokenFilter(authenticationManager())) // UsernamePasswordAuthenticationFilter
+//                .addFilterBefore(new AuthenticationTokenFilter(authenticationManager()), UsernamePasswordAuthenticationFilter.class)
 //                .httpBasic()  开启http basic验证，会创建BasicAuthenticationFilter拦截器
         ;
     }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 public class BaseConfig {
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
+//        bCryptPasswordEncoder.matches(oldPass, user.getPassword())
         return new BCryptPasswordEncoder();
     }
 }

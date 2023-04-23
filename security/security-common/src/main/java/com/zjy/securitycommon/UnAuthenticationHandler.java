@@ -33,5 +33,7 @@ public class UnAuthenticationHandler implements AuthenticationEntryPoint {
 
 //        StringBuffer requestURL = request.getRequestURL();
 //        response.sendRedirect();
+
+//        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException == null ? "Unauthorized" : authException.getMessage());
     }
 }

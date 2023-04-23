@@ -65,6 +65,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.search.suggest.Suggest;
@@ -258,6 +259,7 @@ public class EsHighLevelOpt {
 //            Requests.createIndexRequest(index);
             IndexRequest ir = new IndexRequest(index);
             ir.id(id).source(XContentFactory.jsonBuilder().value(objectToJSONObject(student)));
+//            ir.id(id).timeout("1s").source(JSON.toJSON(student), XContentType.JSON);
             IndexResponse indexResponse = restHighLevelClient.index(ir, RequestOptions.DEFAULT);
             if (indexResponse.getResult() == DocWriteResponse.Result.UPDATED || indexResponse.getResult() == DocWriteResponse.Result.NOOP) {
                 return true;
@@ -373,10 +375,11 @@ public class EsHighLevelOpt {
         try {
             for (Student student : list) {
                 IndexRequest indexRequest = new IndexRequest(index);
-                indexRequest.id(student.getStudentId().toString()).source(XContentFactory.jsonBuilder().value(objectToJSONObject(student)));
+                indexRequest.id(student.getStudentId().toString()).source(XContentFactory.jsonBuilder().value(objectToJSONObject(student)), XContentType.JSON);
                 //            indexRequest.id(String.valueOf(bulk.getId())).source(bulk.toString(), XContentType.JSON);
                 bulkRequest.add(indexRequest); // 加入到批量请求bulk
             }
+            log.info("bulk request. param: {}", bulkRequest.requests());
             bulkResponse = restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
             boolean b = bulkResponse.hasFailures();
         } catch (IOException e) {
@@ -495,14 +498,17 @@ public class EsHighLevelOpt {
     public List<Student> mulitSearch() {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
+        Calendar myCalendar = new GregorianCalendar(2022, Calendar.JANUARY, 4,8,24, 45);
 
         QueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery("name", QueryParserBase.escape("王")))
-                .must(QueryBuilders.rangeQuery("birthday").gte(new Date(2022 - 1900, 1 - 1, 4, 8, 24, 45).getTime()))
-                .must(QueryBuilders.rangeQuery("birthday").lte(new Date(2022 - 1900, 1 - 1, 5, 19, 54, 32).getTime()));
+                .must(QueryBuilders.rangeQuery("birthday").gte(myCalendar.getTime()))
+                .must(QueryBuilders.rangeQuery("birthday").lte(new Date(2022 - 1900, Calendar.JANUARY, 5, 19, 54, 32).getTime()));
         searchSourceBuilder.query(queryBuilder);
 
         searchSourceBuilder.sort("birthday", SortOrder.ASC);
+//        searchSourceBuilder.sort(SortBuilders.scoreSort().order(SortOrder.ASC));
+//        searchSourceBuilder.sort(SortBuilders.fieldSort("birthday").order(SortOrder.ASC));
         searchSourceBuilder.from(0);
         searchSourceBuilder.size(100);
         searchSourceBuilder.timeout(new TimeValue(10, TimeUnit.SECONDS));

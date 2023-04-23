@@ -14,9 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 
 /**
- * Created by echisan on 2018/6/23
+ * 默认使用 UsernamePasswordAuthenticationFilter，基本满足需求，也可以订制
  */
-
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 

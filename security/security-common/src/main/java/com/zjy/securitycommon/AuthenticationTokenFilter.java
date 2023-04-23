@@ -36,15 +36,15 @@ public class AuthenticationTokenFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
-        String token = "";
-        Cookie[] cookies = request.getCookies();
-        if(cookies != null) {
-            for (Cookie cookie : cookies) {
-                if(cookie.getName().equals(JwtTokenUtils.TOKEN_HEADER)) {
-                    token = cookie.getValue();
-                }
-            }
-        }
+//        Cookie[] cookies = request.getCookies();
+        String token = request.getHeader(JwtTokenUtils.TOKEN_HEADER);
+//        if(cookies != null) {
+//            for (Cookie cookie : cookies) {
+//                if(cookie.getName().equals(JwtTokenUtils.TOKEN_HEADER)) {
+//                    token = cookie.getValue();
+//                }
+//            }
+//        }
         if(token != null && !token.trim().equals("")) {
             String username = JwtTokenUtils.getUsername(token);
             LOGGER.info("checking username:{}", username);
@@ -56,12 +56,14 @@ public class AuthenticationTokenFilter extends BasicAuthenticationFilter {
                 User user = new User(username, "abc", collect);
                 // 获取用户权限，绑定到上下文中 AbstractSecurityInterceptor.attemptAuthorization
 //                UserDetails user = this.userDetailsService.loadUserByUsername(username);
-                // 验证token是否有效
+                // todo: 验证token是否有效，比如用户登录成功后，将token放在redis中，并且有过期时间，然后下发到用户端，
+                // 用户再次请求时，会携带token，拿到这个token和redis中的token进行对比是否一致，
 //                if (JwtTokenUtils.validateToken(authToken, userDetails)) {
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                     // 注意，这里set后系统中都会按这个来操作，包括权限，因此这里的权限应该是真正的权限
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     LOGGER.info("authenticated user:{}", username);
+                    // 验证token后将其放在上下文中，如果未设置到上下文中，则进入后面的filter时会跳转登录
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 //                }
             }
