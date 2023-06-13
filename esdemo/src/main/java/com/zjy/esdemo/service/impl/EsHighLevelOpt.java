@@ -375,7 +375,8 @@ public class EsHighLevelOpt {
         try {
             for (Student student : list) {
                 IndexRequest indexRequest = new IndexRequest(index);
-                indexRequest.id(student.getStudentId().toString()).source(XContentFactory.jsonBuilder().value(objectToJSONObject(student)), XContentType.JSON);
+                indexRequest.id(student.getStudentId().toString()).source(XContentFactory.jsonBuilder().value(objectToJSONObject(student)));
+//                indexRequest.id(student.getStudentId().toString()).source(XContentFactory.jsonBuilder().value(objectToJSONObject(student)), XContentType.JSON);
                 //            indexRequest.id(String.valueOf(bulk.getId())).source(bulk.toString(), XContentType.JSON);
                 bulkRequest.add(indexRequest); // 加入到批量请求bulk
             }
