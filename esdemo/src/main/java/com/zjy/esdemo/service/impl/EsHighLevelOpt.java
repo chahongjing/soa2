@@ -583,6 +583,11 @@ public class EsHighLevelOpt {
         });
     }
 
+    /**
+     * 也可以使用 searchafter 避免深度分页，searchafter在执行过程中，有可能排序的值发生变化，导致有重复或缺失。
+     * @param indexName
+     * @return
+     */
     public List<Long> fetchAllId(String indexName) {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().filter(QueryBuilders.termQuery("region", 1));
         queryBuilder.filter(QueryBuilders.termsQuery("type", Arrays.asList(1, 2, 3, 4)));

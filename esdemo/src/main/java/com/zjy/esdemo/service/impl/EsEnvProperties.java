@@ -65,11 +65,13 @@ public class EsEnvProperties {
     public RestHighLevelClient restHighLevelClientBuilderWithPasswordAuth() {
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
-        RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(3000).setSocketTimeout(3000).build();
+        RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(3000).setSocketTimeout(3000)
+                .setConnectionRequestTimeout(3000).build();
         return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, protocol))
                 .setHttpClientConfigCallback((HttpAsyncClientBuilder builder) ->
                         builder.setDefaultCredentialsProvider(credentialsProvider)
                                 .setDefaultRequestConfig(requestConfig)
+                                .setMaxConnTotal(10).setMaxConnPerRoute(10)
                 )
         );
     }
