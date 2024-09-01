@@ -35,4 +35,10 @@ public class IndexController {
         map.put("msg", "访问成功!");
         return map;
     }
+
+    @GetMapping("test")
+    public Map test1(Integer id) {
+        LinkedListIterationBenchMark.main(null);
+        return null;
+    }
 }

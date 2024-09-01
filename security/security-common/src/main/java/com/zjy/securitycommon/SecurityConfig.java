@@ -1,13 +1,16 @@
 package com.zjy.securitycommon;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -35,6 +38,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     protected UnAuthenticationHandler unAuthenticationHandler;
 
+//    @Override
+//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//        auth.inMemoryAuthentication()
+//                .withUser("admin").password("123").roles("admin");
+//        super.configure(auth);
+//    }
+// @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
+
+//    @Bean
+//    public CorsFilter corsFilter() {
+//        final UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
+//        final CorsConfiguration cors = new CorsConfiguration();
+//        cors.setAllowCredentials(true);
+//        cors.addAllowedOrigin("*");
+//        cors.addAllowedHeader("*");
+//        cors.addAllowedMethod("*");
+//        urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", cors);
+//        return new CorsFilter(urlBasedCorsConfigurationSource);
+//
+//    }
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
@@ -75,6 +98,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 其他任何请求都需要身份认证
         registry.and()
                 .formLogin()
+                // 登录认证接口
+//                .loginProcessingUrl()
                 // 指定登录页面(GET)及登录地址(表单POST)
                 .loginPage("/login")
                 .usernameParameter("username")
@@ -85,6 +110,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .failureHandler(loginFailureHandler)
                 .permitAll()
                 .and()
+//                .logoutUrl()
                 .logout()
                 .logoutSuccessHandler(logoutSuccessHandler)
                 .and()
@@ -95,6 +121,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf()
                 .disable()
+//                .invalidataHttpSession(true)
+//                .clearAuthentication(true)
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 // 自定义权限拒绝处理类

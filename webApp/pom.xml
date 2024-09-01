@@ -46,13 +46,100 @@
             <artifactId>apm-toolkit-trace</artifactId>
             <version>6.5.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>1.21</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.openjdk.jmh</groupId>-->
+<!--            <artifactId>jmh-generator-annprocess</artifactId>-->
+<!--            <version>1.21</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>4.10.0</version>
+        </dependency>
     </dependencies>
 
     <build>
+        <finalName>soa2</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>1.4.13</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <repository>chahongjing/${project.artifactId}</repository>
+                    <tag>${project.version}</tag>
+                    <buildArgs>
+                        <!-- dockerfile中的ARG参数 -->
+                        <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                    </buildArgs>
+                </configuration>
+            </plugin>
+            <!-- docker
+             1. mvn verify
+             2. mvn docker:start
+             3. docker login 然后 mvn docker:push
+             4. mvn docker:stop
+             -->
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.44.0</version>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>chahongjing/${project.name}:${project.version}</name>
+                            <alias>${project.name}</alias>
+                            <build>
+                                <from>openjdk:8</from>
+                                <assembly>
+                                    <descriptorRef>artifact</descriptorRef>
+                                </assembly>
+                                <cmd>java -jar maven/${project.name}-${project.version}.jar</cmd>
+                            </build>
+                            <run>
+                                <containerNamePattern>%a-%i</containerNamePattern>
+                                <ports>
+                                    <port>8080:8080</port>
+                                </ports>
+                                <wati>
+                                    <http>
+                                        <url>http://localhost:8080/health</url>
+                                    </http>
+                                    <time>3000</time>
+                                </wati>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>build</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

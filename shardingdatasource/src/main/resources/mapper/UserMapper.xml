@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjy.shardingdatasource.mapper.UserMapper">
+    <!-- 通过编码获取 -->
+    <select id="getById" resultType="com.zjy.shardingdatasource.model.UserInfo">
+        SELECT *
+        FROM user_info
+        WHERE id = #{id, jdbcType = BIGINT}
+    </select>
+
+    <select id="getByIdList" resultType="com.zjy.shardingdatasource.model.UserInfo">
+        SELECT *
+        FROM user_info
+        WHERE id in <foreach collection="idList" item="id" open="(" close=")" separator=",">#{id}</foreach>
+    </select>
+
+    <select id="getLog" resultType="com.zjy.shardingdatasource.model.UserInfo">
+        SELECT *
+        FROM user_log
+        WHERE id = #{id, jdbcType = BIGINT}
+    </select>
+</mapper>

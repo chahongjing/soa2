@@ -7,6 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 /**
  * 将用户的登录信息放到上下文中，UsernamePasswordAuthenticationFilter
+ * AuthenticationProvider
  */
 public class AuthenticationTokenFilter extends BasicAuthenticationFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationTokenFilter.class);
@@ -70,4 +72,23 @@ public class AuthenticationTokenFilter extends BasicAuthenticationFilter {
         }
         chain.doFilter(request, response);
     }
+
+//    @Override
+//    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
+//        String authHeader = httpServletRequest.getHeader(jwtTokenUtil.getHeader());
+//        if (authHeader != null && StringUtils.isNotEmpty(authHeader)) {
+//            String username = jwtTokenUtil.getUsernameFromToken(authHeader);
+//            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+//                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+//                if (jwtTokenUtil.validateToken(authHeader, userDetails)) {
+//                    UsernamePasswordAuthenticationToken authentication =
+//                            new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+//                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
+//                    SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+//                }
+//            }
+//        }
+//        filterChain.doFilter(httpServletRequest, httpServletResponse);
+//    }
 }

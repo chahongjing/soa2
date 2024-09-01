@@ -45,6 +45,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         LoginUser loginUser = new LoginUser();
         loginUser.setUsername(request.getParameter("username"));
         loginUser.setPassword(request.getParameter("password"));
+        // 进行登录验证，如账号密码是否有误
         return this.getAuthenticationManager().authenticate(
                 new UsernamePasswordAuthenticationToken(loginUser.getUsername(), loginUser.getPassword(), new ArrayList<>())
         );

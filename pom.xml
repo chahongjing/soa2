@@ -30,6 +30,7 @@
         <module>springboot-admin</module>
         <module>mp</module>
         <module>multidatasource</module>
+        <module>shardingdatasource</module>
         <module>esdemo</module>
         <module>rocketmq</module>
         <module>javaagent</module>
