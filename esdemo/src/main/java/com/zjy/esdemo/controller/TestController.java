@@ -10,7 +10,7 @@ import com.zjy.esdemo.service.impl.EsHighLevelOpt;
 import com.zjy.esdemo.service.impl.StudentServiceImpl;
 import com.zjy.esdemo.service.impl.Utils;
 import com.zjy.esdemo.test.CustomSmartChineseAnalyzer;
-import com.zjy.esdemo.test.FST;
+import com.zjy.esdemo.test.MyFST;
 import com.zjy.esdemo.test.FSTUtil;
 import com.zjy.esdemo.test.ValueLocation;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -213,7 +212,7 @@ public class TestController {
     }
 
     private static void test1() {
-        FST dict = new FST();
+        MyFST dict = new MyFST();
         for (String s : getKeyword()) {
             dict.addWord(s);
         }
@@ -243,7 +242,7 @@ public class TestController {
     }
 
     private static void test3() {
-        FST dict = new FST();
+        MyFST dict = new MyFST();
         String text = "试一试分词效果，我得名字叫彭胜文，曾用名是彭1胜利";
         dict.addWord("文，曾用名");
         dict.addWord("彭胜文");

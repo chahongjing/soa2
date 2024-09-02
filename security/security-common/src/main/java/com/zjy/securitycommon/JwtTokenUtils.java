@@ -32,6 +32,18 @@ public class JwtTokenUtils {
     // 选择了记住我之后的过期时间为7天
     private static final long EXPIRATION_REMEMBER = 604800L;
 
+//    {
+//        "alg": "HS256",
+//            "typ": "JWT"
+//    }
+//    iss (issuer)：签发人
+//    sub (subject)：主题
+//    aud (audience)：受众
+//    nbf (Not Before)：生效时间
+//    exp (expiration time)：过期时间
+//    iat (Issued At)：签发时间
+//    jti (JWT ID)：编号
+
     // 创建token
     public static String createToken(String username, String role, boolean isRememberMe) {
         long expiration = isRememberMe ? EXPIRATION_REMEMBER : EXPIRATION;

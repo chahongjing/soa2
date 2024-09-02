@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zjy.esdemo.po.Student;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParserBase;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.DocWriteResponse;
@@ -24,7 +26,12 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
-import org.elasticsearch.client.*;
+import org.elasticsearch.client.GetAliasesResponse;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.AnalyzeRequest;
 import org.elasticsearch.client.indices.AnalyzeResponse;
 import org.elasticsearch.client.indices.CreateIndexRequest;
@@ -48,6 +55,7 @@ import org.elasticsearch.index.mapper.ObjectMapper;
 import org.elasticsearch.index.mapper.TextFieldMapper;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
@@ -61,12 +69,13 @@ import org.elasticsearch.script.mustache.SearchTemplateResponse;
 import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.BucketOrder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
-import org.elasticsearch.search.sort.SortBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.search.suggest.Suggest;
 import org.elasticsearch.search.suggest.SuggestBuilder;
@@ -77,10 +86,20 @@ import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.zjy.esdemo.service.impl.Constants.STUDENT_INDEX;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
@@ -110,45 +129,56 @@ public class EsHighLevelOpt {
 //        cir.settings(settings, XContentType.JSON);
 //        cir.mapping(mapping, XContentType.JSON);
         XContentBuilder builder = jsonBuilder();
-        builder.startObject(); {
-            builder.startObject("properties"); {
-                builder.startObject("_class"); {
+        builder.startObject();
+        {
+            builder.startObject("properties");
+            {
+                builder.startObject("_class");
+                {
                     builder.field("type", KeywordFieldMapper.CONTENT_TYPE);
                 }
                 builder.endObject();
-                builder.startObject("studentId"); {
+                builder.startObject("studentId");
+                {
                     builder.field("type", KeywordFieldMapper.CONTENT_TYPE);
                 }
                 builder.endObject();
-                builder.startObject("name"); {
+                builder.startObject("name");
+                {
                     builder.field("type", KeywordFieldMapper.CONTENT_TYPE);
                 }
                 builder.endObject();
-                builder.startObject("name_completion"); {
+                builder.startObject("name_completion");
+                {
                     builder.field("type", CompletionFieldMapper.CONTENT_TYPE);
                 }
                 builder.endObject();
-                builder.startObject("desc"); {
+                builder.startObject("desc");
+                {
                     builder.field("type", TextFieldMapper.CONTENT_TYPE);
 //                            .field("analyzer", "ik_smart")
 //                            .field("search_analyzer", "ik_max_word");
                 }
                 builder.endObject();
-                builder.startObject("age"); {
+                builder.startObject("age");
+                {
                     builder.field("type", NumberFieldMapper.NumberType.INTEGER.typeName());
                 }
                 builder.endObject();
-                builder.startObject("scores"); {
+                builder.startObject("scores");
+                {
                     builder.field("type", NumberFieldMapper.NumberType.DOUBLE.typeName());
 //                            field("analyzer", "ik_smart").
 //                            field("search_analyzer", "ik_max_word");
                 }
                 builder.endObject();
-                builder.startObject("birthday"); {
+                builder.startObject("birthday");
+                {
                     builder.field("type", NumberFieldMapper.NumberType.LONG.typeName());
                 }
                 builder.endObject();
-                builder.startObject("address"); {
+                builder.startObject("address");
+                {
                     builder.field("type", ObjectMapper.CONTENT_TYPE);
 
                     builder.startObject("properties");
@@ -178,7 +208,8 @@ public class EsHighLevelOpt {
                     builder.endObject();
                 }
                 builder.endObject();
-                builder.startObject("interests"); {
+                builder.startObject("interests");
+                {
                     builder.field("type", NestedObjectMapper.CONTENT_TYPE);
                     builder.startObject("properties");
                     {
@@ -232,17 +263,19 @@ public class EsHighLevelOpt {
     // endregion
 
     // region doc
+
     /**
      * 查询
-     * @param index 索引
+     *
+     * @param index               索引
      * @param searchSourceBuilder
      * @return
      * @throws IOException
      */
     public SearchResponse searchBySearchSourceBuilder(String index, SearchSourceBuilder searchSourceBuilder) {
         // 组装SearchRequest请求
-         SearchRequest searchRequest = new SearchRequest(index);
-         searchRequest.source(searchSourceBuilder);
+        SearchRequest searchRequest = new SearchRequest(index);
+        searchRequest.source(searchSourceBuilder);
         // 同步获取SearchResponse结果
         log.info("es search param: {}", searchRequest.source().toString());
         SearchResponse searchResponse = null;
@@ -345,7 +378,7 @@ public class EsHighLevelOpt {
         // 更新最大文档数
         request.setSize(10);
         // 批次大小
-         request.setBatchSize(1000);
+        request.setBatchSize(1000);
         // 并行
         request.setSlices(2);
         // 使用滚动参数来控制“搜索上下文”存活的时间
@@ -354,19 +387,20 @@ public class EsHighLevelOpt {
         request.setTimeout(TimeValue.timeValueMinutes(2));
         // 刷新索引
         request.setRefresh(true);
-         try {
-             BulkByScrollResponse response = restHighLevelClient.deleteByQuery(request, RequestOptions.DEFAULT);
-             return response.getStatus().getUpdated();
-         } catch (IOException e) {
-             e.printStackTrace();
-         }
-         return -1L;
+        try {
+            BulkByScrollResponse response = restHighLevelClient.deleteByQuery(request, RequestOptions.DEFAULT);
+            return response.getStatus().getUpdated();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return -1L;
     }
 
     /**
      * 批量修改删除原理相同，也可混合 只需在 bulkRequest.add 不同请求即可
+     *
      * @param index 索引
-     * @param list 待插入集合 注：每个String元素需为json字符串
+     * @param list  待插入集合 注：每个String元素需为json字符串
      * @return
      */
     public BulkResponse bulkInsert(String index, List<Student> list) {
@@ -406,7 +440,7 @@ public class EsHighLevelOpt {
             log.error("es add batch data filed", e);
         }
     }
-    
+
     public void updateByQueryRequest() throws IOException {
         UpdateByQueryRequest request = new UpdateByQueryRequest(STUDENT_INDEX);
         request.setConflicts("proceed");
@@ -436,6 +470,7 @@ public class EsHighLevelOpt {
 
     /**
      * 获取所有索引别名
+     *
      * @return
      */
     public Map<String, String> getAlias() {
@@ -460,17 +495,19 @@ public class EsHighLevelOpt {
             public void beforeBulk(long executionId, BulkRequest request) {
                 log.info("---尝试插入{}条数据---", request.numberOfActions());
             }
+
             @Override
             public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
                 log.info("---尝试插入{}条数据成功---", request.numberOfActions());
             }
+
             @Override
             public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
                 log.error("---尝试插入数据失败---", failure);
             }
         };
         return BulkProcessor.builder((request, bulkListener) ->
-                restHighLevelClient.bulkAsync(request, RequestOptions.DEFAULT, bulkListener), listener)
+                        restHighLevelClient.bulkAsync(request, RequestOptions.DEFAULT, bulkListener), listener)
                 .setBulkActions(10000)
                 .setBulkSize(new ByteSizeValue(5, ByteSizeUnit.MB))
                 .setFlushInterval(TimeValue.timeValueSeconds(5))
@@ -482,7 +519,7 @@ public class EsHighLevelOpt {
         BulkProcessor bulkProcessor = init();
         IndexRequest request;
         try {
-            for(Student student: studentList) {
+            for (Student student : studentList) {
                 request = new IndexRequest(indexName);
                 request.id(student.getStudentId().toString()).source(XContentFactory.jsonBuilder().value(objectToJSONObject(student)));
                 bulkProcessor.add(request);
@@ -494,12 +531,13 @@ public class EsHighLevelOpt {
 
     /**
      * 嵌套查询，高亮
+     *
      * @return
      */
     public List<Student> mulitSearch() {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-        Calendar myCalendar = new GregorianCalendar(2022, Calendar.JANUARY, 4,8,24, 45);
+        Calendar myCalendar = new GregorianCalendar(2022, Calendar.JANUARY, 4, 8, 24, 45);
 
         QueryBuilder queryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termQuery("name", QueryParserBase.escape("王")))
@@ -527,7 +565,7 @@ public class EsHighLevelOpt {
 
         List<Student> studentList = new ArrayList<>();
         SearchResponse searchResponse = searchBySearchSourceBuilder(STUDENT_INDEX, searchSourceBuilder);
-        if(searchResponse == null) {
+        if (searchResponse == null) {
             return studentList;
         }
 
@@ -535,9 +573,9 @@ public class EsHighLevelOpt {
         log.info("es search took: {}", searchResponse.getTook());
         for (SearchHit hit : hitsArr) {
             Student student = JSONObject.parseObject(hit.getSourceAsString(), Student.class);
-            if(!CollectionUtils.isEmpty(hit.getHighlightFields())) {
+            if (!CollectionUtils.isEmpty(hit.getHighlightFields())) {
                 HighlightField highlightField = hit.getHighlightFields().get("name");
-                if(highlightField != null) {
+                if (highlightField != null) {
                     student.setName(Arrays.stream(highlightField.getFragments()).map(Text::toString).collect(Collectors.joining("")));
                 }
             }
@@ -550,12 +588,13 @@ public class EsHighLevelOpt {
      * object搜索
      * object直接用.查询，如address.area。注意如果索引类型是nested，此操作无法查出数据
      * nested要用nested嵌套查询，注意path
+     *
      * @param index
      */
     public void searchInObject(String index) {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         QueryBuilder boolQueryBuilder = QueryBuilders.boolQuery().
-                must(QueryBuilders.termQuery("address.area","南漳县"));
+                must(QueryBuilders.termQuery("address.area", "南漳县"));
         searchSourceBuilder.query(boolQueryBuilder);
 
         SearchResponse response = searchBySearchSourceBuilder(index, searchSourceBuilder);
@@ -567,6 +606,7 @@ public class EsHighLevelOpt {
 
     /**
      * nest搜索。注意如果索引类型不是nested，此操作无法查出数据
+     *
      * @param index
      */
     public void searchNested(String index) {
@@ -583,16 +623,55 @@ public class EsHighLevelOpt {
         });
     }
 
+    public List<Student> search(String index, Long region, String key) throws IOException {
+        if (StringUtils.isBlank(key)) return new ArrayList<>();
+        key = key.trim();
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
+        builder.query(boolQueryBuilder);
+
+        BoolQueryBuilder filterQueryBuilder = new BoolQueryBuilder();
+        filterQueryBuilder.must(QueryBuilders.termQuery("region", region));
+        boolQueryBuilder.filter(filterQueryBuilder);
+        boolQueryBuilder.must(QueryBuilders.matchQuery("query", key).operator(Operator.AND));
+        builder.from(0);
+        builder.size(0);
+
+        // 按关键字分组后，把每个文档的分数加起来，按分数倒序排列
+        TermsAggregationBuilder aggre = AggregationBuilders
+                .terms("query_keyword")
+                .field("query_keyword")
+                .size(10)
+                // 按分数倒排
+                .order(BucketOrder.aggregation("su", false));
+        // 计算分数脚本
+        aggre.subAggregation(AggregationBuilders.sum("su").script(new Script("_score")));
+        builder.aggregation(aggre);
+        log.info("query search builder: {}, agg:{}", builder, aggre);
+        SearchRequest request = new SearchRequest(index);
+        request.source(builder);
+        final SearchResponse search = restHighLevelClient.search(request, RequestOptions.DEFAULT);
+        if (search == null || search.getHits() == null || ArrayUtils.isEmpty(search.getHits().getHits()))
+            return new ArrayList<>();
+        List<Student> list = new ArrayList<>();
+        Set<String> querySet = new HashSet<>();
+        for (SearchHit hit : search.getHits()) {
+            final Student bean = JSON.parseObject(hit.getSourceAsString(), Student.class);
+            if (key.equals(bean.getName()) || list.size() >= 10 || querySet.contains(bean.getName())) continue;
+            querySet.add(bean.getName());
+            list.add(bean);
+        }
+        return list;
+    }
+
     /**
      * 也可以使用 searchafter 避免深度分页，searchafter在执行过程中，有可能排序的值发生变化，导致有重复或缺失。
+     *
      * @param indexName
      * @return
      */
-    public List<Long> fetchAllId(String indexName) {
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().filter(QueryBuilders.termQuery("region", 1));
-        queryBuilder.filter(QueryBuilders.termsQuery("type", Arrays.asList(1, 2, 3, 4)));
-        List<Long> idList = new ArrayList<>(50000);
-        int pageSize = 10000;
+    public void scrollFetch(String indexName, QueryBuilder queryBuilder, Consumer<SearchHit[]> consumer) {
+        int pageSize = 100;
         SearchRequest request = new SearchRequest(indexName);
 
         SearchSourceBuilder builder = new SearchSourceBuilder();
@@ -600,34 +679,28 @@ public class EsHighLevelOpt {
         builder.query(queryBuilder);
         builder.size(pageSize);
         builder.fetchSource(new String[]{"id"}, Strings.EMPTY_ARRAY);
-        builder.sort(SortBuilders.fieldSort("create_time").order(SortOrder.ASC));
-        builder.sort(SortBuilders.fieldSort("update_time").order(SortOrder.ASC));
 
-        Scroll scroll = new Scroll(TimeValue.timeValueMinutes(2L));
+        Scroll scroll = new Scroll(TimeValue.timeValueMinutes(5L));
         request.scroll(scroll);
 
         SearchResponse response = null;
         int count = 1;
         try {
-            log.info("scroll param: {}", builder.toString());
+            log.info("scroll param: {}", builder);
             response = restHighLevelClient.search(request, RequestOptions.DEFAULT);
             log.info("begin fetch. {}", count);
         } catch (IOException e) {
             log.error("查询es出错", e);
         }
-        if(response == null) {
-            return idList;
+        if (response == null) {
+            return;
         }
         SearchHits hits = response.getHits();
         //记录要滚动的ID
         String scrollId = response.getScrollId();
         SearchHit[] hitsScroll = hits.getHits();
-        while (hitsScroll != null && hitsScroll.length > 0 ) {
-            // 有数据，添加到结果中
-            idList.addAll(Stream.of(hitsScroll).map(hit -> {
-                Student entry = JSON.parseObject(hit.getSourceAsString(), Student.class);
-                return entry.getStudentId();
-            }).collect(Collectors.toList()));
+        while (hitsScroll != null && hitsScroll.length > 0) {
+            consumer.accept(hitsScroll);
 
             // 再构造滚动查询条件，进行下一次查询
             SearchScrollRequest searchScrollRequest = new SearchScrollRequest(scrollId);
@@ -638,19 +711,18 @@ public class EsHighLevelOpt {
             } catch (IOException e) {
                 log.error("滚动查询失败", e);
             }
-            if(response == null) {
-                return idList;
+            if (response == null) {
+                return;
             }
             scrollId = response.getScrollId();
             hits = response.getHits();
             hitsScroll = hits.getHits();
-            if(hitsScroll != null && hitsScroll.length > 0) {
+            if (hitsScroll != null && hitsScroll.length > 0) {
                 count++;
                 log.info("next fetch. {}", count);
             }
         }
         log.info("fetch es done. {}", count);
-        return idList;
     }
 
     public void testSearchAfter(String indexName) throws IOException {
@@ -684,7 +756,7 @@ public class EsHighLevelOpt {
     public List<String> suggest(String indexName, String keyword) {
         CompletionSuggestionBuilder csb = SuggestBuilders.completionSuggestion("name_completion")
                 .prefix(keyword, Fuzziness.ONE).skipDuplicates(true).size(10);
-                //.analyzer("ik_max_word");
+        //.analyzer("ik_max_word");
         SuggestBuilder suggestBuilder = new SuggestBuilder();
         String suggestName = "justASuggestName";
         suggestBuilder.addSuggestion(suggestName, csb);
@@ -710,6 +782,7 @@ public class EsHighLevelOpt {
 
     /**
      * 使用分词器对搜索内容进行分词
+     *
      * @param index
      * @param keyword
      * @return
@@ -732,7 +805,7 @@ public class EsHighLevelOpt {
     // endregion
 
     // region 模板
-    public String createEsTemplate(String templateid){
+    public String createEsTemplate(String templateid) {
         Request scriptRequest = new Request("POST", "_scripts/" + templateid);
         String templateJsonString = Utils.getJsonByTemplate("template.json");
         scriptRequest.setJsonEntity(templateJsonString);
@@ -746,7 +819,7 @@ public class EsHighLevelOpt {
         return "创建模板成功";
     }
 
-    public String deleteEsTemplate(String templateid){
+    public String deleteEsTemplate(String templateid) {
         Request scriptRequest = new Request("DELETE", "_scripts/" + templateid);
         RestClient restClient = restHighLevelClient.getLowLevelClient();
         try {
@@ -758,7 +831,7 @@ public class EsHighLevelOpt {
         return "创建模板成功";
     }
 
-    public String getEsTemplate(String templateid, Map<String,Object> map){
+    public String getEsTemplate(String templateid, Map<String, Object> map) {
         SearchTemplateRequest request = new SearchTemplateRequest();
         request.setScriptType(ScriptType.STORED);
         request.setScript(templateid);
@@ -775,7 +848,7 @@ public class EsHighLevelOpt {
         return "";
     }
 
-    public List<Map<String, Object>> useEsTemplate(String topic, String templateid, Map<String,Object> map){
+    public List<Map<String, Object>> useEsTemplate(String topic, String templateid, Map<String, Object> map) {
         SearchTemplateRequest request = new SearchTemplateRequest();
         request.setRequest(new SearchRequest(topic));
         request.setScriptType(ScriptType.STORED);
@@ -800,21 +873,21 @@ public class EsHighLevelOpt {
 
     public List<Map<String, Object>> setSearchResponse(SearchResponse searchResponse, String highlightField) {
         //解析结果
-        ArrayList<Map<String,Object>> list = new ArrayList<>();
+        ArrayList<Map<String, Object>> list = new ArrayList<>();
         for (SearchHit hit : searchResponse.getHits().getHits()) {
             Map<String, HighlightField> high = hit.getHighlightFields();
             HighlightField title = high.get(highlightField);
             hit.getSourceAsMap().put("id", hit.getId());
             Map<String, Object> sourceAsMap = hit.getSourceAsMap();//原来的结果
             //解析高亮字段,将原来的字段换为高亮字段
-            if (title!=null){
+            if (title != null) {
                 Text[] texts = title.fragments();
-                String nTitle="";
+                String nTitle = "";
                 for (Text text : texts) {
-                    nTitle+=text;
+                    nTitle += text;
                 }
                 //替换
-                sourceAsMap.put(highlightField,nTitle);
+                sourceAsMap.put(highlightField, nTitle);
             }
             list.add(sourceAsMap);
         }
@@ -824,9 +897,9 @@ public class EsHighLevelOpt {
 
     // region 辅助方法
     private JSONObject objectToJSONObject(Student student) {
-        JSONObject jsonObject = (JSONObject)JSON.toJSON(student);
+        JSONObject jsonObject = (JSONObject) JSON.toJSON(student);
         jsonObject.forEach((key, value) -> {
-            if(value != null && value.getClass() == Date.class) {
+            if (value != null && value.getClass() == Date.class) {
                 jsonObject.put(key, ((Date) value).getTime());
             }
         });

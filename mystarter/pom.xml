@@ -23,6 +23,8 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
+        <!-- 下面的包会自动生成spring-configuration-metadata.json文件，如果需要手动调整，则可以添加additional-spring-configuration-metadata.json
+         这两个文件最终会进行合并 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>

@@ -8,10 +8,13 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.apache.http.impl.nio.conn.PoolingNHttpClientConnectionManager;
+import org.apache.http.impl.nio.reactor.DefaultConnectingIOReactor;
+import org.apache.http.impl.nio.reactor.IOReactorConfig;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.nio.reactor.IOReactorException;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -62,16 +65,23 @@ public class EsEnvProperties {
      * @return
      */
 //    @Bean
-    public RestHighLevelClient restHighLevelClientBuilderWithPasswordAuth() {
+    public RestHighLevelClient restHighLevelClientBuilderWithPasswordAuth() throws IOReactorException {
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
         RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(3000).setSocketTimeout(3000)
                 .setConnectionRequestTimeout(3000).build();
+        PoolingNHttpClientConnectionManager cm = new PoolingNHttpClientConnectionManager(
+                new DefaultConnectingIOReactor(IOReactorConfig.DEFAULT));
+        cm.setMaxTotal(50);
         return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, protocol))
                 .setHttpClientConfigCallback((HttpAsyncClientBuilder builder) ->
                         builder.setDefaultCredentialsProvider(credentialsProvider)
                                 .setDefaultRequestConfig(requestConfig)
                                 .setMaxConnTotal(10).setMaxConnPerRoute(10)
+//                                .setDefaultIOReactorConfig(
+//                                        IOReactorConfig.custom()
+//                                                .setIoThreadCount(10) // 设置线程数
+//                                                .build()).setConnectionManager(cm)
                 )
         );
     }
